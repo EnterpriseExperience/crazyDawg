@@ -12110,7 +12110,7 @@ addcmd('trip',{},function(args, speaker)
 	end
 end)
 
-addcmd('emote'{},function(args, speaker)
+addcmd('emote',{},function(args, speaker)
   speaker.Character:FindFirstChildOfClass("Humanoid"):PlayEmoteAndGetAnimTrackById(tonumber(args[1]))
 end)
 

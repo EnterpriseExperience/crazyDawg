@@ -12,7 +12,7 @@ Players = cloneref(game:GetService("Players"))
 if not game:IsLoaded() then
     local notLoaded = Instance.new("Message")
     notLoaded.Parent = COREGUI
-    notLoaded.Text = "Infinite Yield is waiting for the game to load"
+    notLoaded.Text = "IY Extra is waiting for the game to load"
     game.Loaded:Wait()
     notLoaded:Destroy()
 end
@@ -12229,6 +12229,10 @@ addcmd('tpunanchored',{'tpua'},function(args, speaker)
 	end
 end)
 
+addcmd('UniversalGUI',{'UniGUI'},function(speaker)
+    
+end)
+
 keycodeMap = {
 	["0"] = 0x30,
 	["1"] = 0x31,
@@ -12504,15 +12508,13 @@ IYMouse.Move:Connect(checkTT)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/version')
+		local versionJson = game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/version')
 		return HttpService:JSONDecode(versionJson)
 	end)
 
 	if success then
 		if currentVersion ~= latestVersionInfo.Version then
-			setclipboard("https://github.com/EnterpriseExperience/crazyDawg/wiki")
-			wait()
-			notify('Outdated','Get the new version (copied to clipboard)')
+			notify('Outdated','Get the new version at github.com/EnterpriseExperience/crazyDawg')
 		end
 
 		if latestVersionInfo.Announcement and latestVersionInfo.Announcement ~= '' then
@@ -12548,7 +12550,7 @@ task.spawn(function()
 			TextBox.Font = Enum.Font.SourceSans
 			TextBox.TextSize = 18
 			TextBox.TextWrapped = true
-			TextBox.Text = Announcement
+			TextBox.Text = tostring(latestVersionInfo.Announcement)
 			TextBox.TextColor3 = currentText1
 			TextBox.TextXAlignment = Enum.TextXAlignment.Left
 			TextBox.TextYAlignment = Enum.TextYAlignment.Top

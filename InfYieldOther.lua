@@ -12508,7 +12508,7 @@ IYMouse.Move:Connect(checkTT)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/version')
+		local versionJson = game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/version')
 		return HttpService:JSONDecode(versionJson)
 	end)
 

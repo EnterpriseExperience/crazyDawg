@@ -1,5 +1,5 @@
 if IY_LOADED and not _G.IY_DEBUG == true then
-    -- error("Infinite Yield is already running!", 0)
+    -- error("Infinite Yield Extra is already running!", 0)
     return
 end
 
@@ -2820,6 +2820,52 @@ useFactorySettings = function()
     binds = {}
     WayPoints = {}
     PluginsTable = {}
+end
+
+local Config = '{"currentShade2":[0.18039216101169587,0.18039216101169587,0.18431372940540315],"StayOpen":false,"logsEnabled":true,"aliases":[],"PluginsTable":[],"prefix":"-","binds":[{"ISKEYUP":false,"KEY":"Enum.KeyCode.One","COMMAND":"emote 13071993910"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Two","COMMAND":"emote 14901371589"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Five","COMMAND":"emote 5104377791"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Six","COMMAND":"emote 13694139364"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Seven","COMMAND":"emote 7466047578"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Eight","COMMAND":"emote 13823339506"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.E","COMMAND":"animspeed 4"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Q","COMMAND":"animspeed 0.1"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Z","COMMAND":"animspeed -1"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.X","COMMAND":"animspeed 1"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Nine","COMMAND":"emote 3576823880"},{"KEY":"Enum.KeyCode.F","ISKEYUP":false,"TOGGLE":"animspeed 0.2","COMMAND":"animspeed -0.2"},{"KEY":"Enum.KeyCode.Four","ISKEYUP":false,"COMMAND":"emote 5230615437"},{"KEY":"Enum.KeyCode.Zero","ISKEYUP":false,"COMMAND":"emote 10214406616"},{"KEY":"Enum.KeyCode.V","ISKEYUP":false,"COMMAND":"freezeanims"},{"KEY":"Enum.KeyCode.Three","ISKEYUP":false,"COMMAND":"emote 3307604888"}],"currentShade3":[0.30588236451148989,0.30588236451148989,0.30980393290519717],"WayPoints":[],"jLogsEnabled":false,"currentScroll":[0.30588236451148989,0.30588236451148989,0.30980393290519717],"keepIY":true,"eventBinds":"{\"OnSpawn\":[],\"OnDied\":[],\"OnExecute\":[],\"OnKilled\":[],\"OnJoin\":[],\"OnLeave\":[],\"OnDamage\":[],\"OnChatted\":[]}","espTransparency":0.3,"currentShade1":[0.1411764770746231,0.1411764770746231,0.14509804546833039],"currentText2":[0,0,0],"currentText1":[1,1,1]}'
+
+if readfile("IY_FE_Y.iy") ~= nil then
+    print("Found File | IY_FE_Y.iy | Custom Configuration Settings...")
+    wait(.5)
+    print("Preparing Config manager.")
+    wait(0.5)
+    print("Preparing Config manager..")
+    wait(0.5)
+    print("Preparing Config manager...")
+    wait(1)
+    print("Overwriting Settings.")
+    wait(0.5)
+    print("Overwriting Settings..")
+    wait(0.5)
+    print("Overwriting Settings...")
+    wait(1)
+    writefile("IY_FE.iy", Config)
+    wait(0.5)
+    repeat wait(0.5) until readfile("IY_FE.iy") ~= nil
+    if readfile("IY_FE.iy") ~= nil then
+        print("Overwritten Config Successfully!")
+    else
+        return warn("Unable to successfully overwrite configuration")
+    end
+else
+    notify("Would you like to use my config?", "Chat: Y or N")
+    wait(.1)
+    game.Players.LocalPlayer.Chatted:Connect(function(Message)
+        local normalizedMessage = Message:upper()
+        local Config = '{"currentShade2":[0.18039216101169587,0.18039216101169587,0.18431372940540315],"StayOpen":false,"logsEnabled":true,"aliases":[],"PluginsTable":[],"prefix":"-","binds":[{"ISKEYUP":false,"KEY":"Enum.KeyCode.One","COMMAND":"emote 13071993910"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Two","COMMAND":"emote 14901371589"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Five","COMMAND":"emote 5104377791"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Six","COMMAND":"emote 13694139364"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Seven","COMMAND":"emote 7466047578"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Eight","COMMAND":"emote 13823339506"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.E","COMMAND":"animspeed 4"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Q","COMMAND":"animspeed 0.1"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Z","COMMAND":"animspeed -1"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.X","COMMAND":"animspeed 1"},{"ISKEYUP":false,"KEY":"Enum.KeyCode.Nine","COMMAND":"emote 3576823880"},{"KEY":"Enum.KeyCode.F","ISKEYUP":false,"TOGGLE":"animspeed 0.2","COMMAND":"animspeed -0.2"},{"KEY":"Enum.KeyCode.Four","ISKEYUP":false,"COMMAND":"emote 5230615437"},{"KEY":"Enum.KeyCode.Zero","ISKEYUP":false,"COMMAND":"emote 10214406616"},{"KEY":"Enum.KeyCode.V","ISKEYUP":false,"COMMAND":"freezeanims"},{"KEY":"Enum.KeyCode.Three","ISKEYUP":false,"COMMAND":"emote 3307604888"}],"currentShade3":[0.30588236451148989,0.30588236451148989,0.30980393290519717],"WayPoints":[],"jLogsEnabled":false,"currentScroll":[0.30588236451148989,0.30588236451148989,0.30980393290519717],"keepIY":true,"eventBinds":"{\"OnSpawn\":[],\"OnDied\":[],\"OnExecute\":[],\"OnKilled\":[],\"OnJoin\":[],\"OnLeave\":[],\"OnDamage\":[],\"OnChatted\":[]}","espTransparency":0.3,"currentShade1":[0.1411764770746231,0.1411764770746231,0.14509804546833039],"currentText2":[0,0,0],"currentText1":[1,1,1]}'
+        if normalizedMessage == "Y" then
+            toClipboard(Config)
+            wait(.2)
+            writefile("IY_FE.iy", Config)
+        else
+            if normalizedMessage == "N" then
+                return print("User Input | N")
+            end
+            if not readfile and writefile then
+                return error("Your executor is not compatible with | readfile | writefile | Methods are unavailable for this executor.", 3)
+            end
+        end
+    end)
 end
 
 local loadedEventData = nil

@@ -7,13 +7,19 @@ If you DO use the config located in this repository named: IY_FE_Y.iy | it will 
 
 ## IF YOU WANT TO USE THE CUSTOM MADE CONFIG, FIRST COPY AND PASTE (CELERY):
 
-'%localappdata%\Temp\celery\workspace'
+`%localappdata%\Temp\celery\workspace`
 
 ## AND PASTE THE FILE TO THIS DIRECTORY^^
 
 ## CUSTOM MADE CONFIG PLACE (SOLARA):
 
-'%USERPROFILE%\Desktop'
+(IF THE FOLDER IS ON YOUR DESKTOP):
+`%USERPROFILE%\Desktop`
+(IF THE FOLDER IS IN YOUR DOWNLOADS):
+`%USERPROFILE%\Downloads`
+(IF THE FOLDER IS IN YOUR DOCUMENTS):
+`%USERPROFILE%\Documents`
+OR FIND THE (SOLARA) FOLDER ELSEWHERE
 
 ## AND FIND YOUR SOLARA FOLDER AND GO TO "workspace" AND PASTE IT IN THE FOLDER
 

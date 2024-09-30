@@ -1,9 +1,9 @@
-if IY_LOADED and not _G.IY_DEBUG == true then
+if GET_LOADED_IY and not _G.DEBUGGING_IY_VER == true then
     -- error("Infinite Yield Extra is already running!", 0)
     return
 end
 
-pcall(function() getgenv().IY_LOADED = true end)
+pcall(function() getgenv().GET_LOADED_IY = true end)
 
 local cloneref = cloneref or function(o) return o end
 COREGUI = cloneref(game:GetService("CoreGui"))

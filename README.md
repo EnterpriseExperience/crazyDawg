@@ -1,6 +1,8 @@
 ## Loadstring Below ##
 
-`loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/InfYieldOther.lua", true))()`
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/InfYieldOther.lua", true))()
+```
 
 ## UPDATE (v1):
 If you DO use the config located in this repository named: IY_FE.iy | use instructions below (this is my config for emotes, and such, for idk), feel free to use it!

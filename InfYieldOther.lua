@@ -12557,7 +12557,7 @@ local TweenService = game:GetService("TweenService")
 
 local function createRainbowTween(guiObject, property)
     local tweenInfo = TweenInfo.new(
-        2.5, -- Seconds
+        2, -- Seconds
         Enum.EasingStyle.Linear,
         Enum.EasingDirection.InOut,
         -1,

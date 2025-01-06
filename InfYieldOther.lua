@@ -1,5 +1,5 @@
 if GET_LOADED_IY and not _G.DEBUGGING_IY_VER == true then
-    -- error("Infinite Yield Extra is already running!", 0)
+    -- error("Infinite Premium is already running!", 0)
     return
 end
 
@@ -12,14 +12,15 @@ Players = cloneref(game:GetService("Players"))
 if not game:IsLoaded() then
     local notLoaded = Instance.new("Message")
     notLoaded.Parent = COREGUI
-    notLoaded.Text = "IY Extra is waiting for the game to load"
+    notLoaded.Text = "Infinite Premium is waiting for the game to load"
     game.Loaded:Wait()
     notLoaded:Destroy()
 end
 
-currentVersion = "6.1.0"
+currentVersion = "7.1.4"
 
 Holder = Instance.new("Frame")
+getgenv().Holder_Frame = Holder
 Title = Instance.new("TextLabel")
 Dark = Instance.new("Frame")
 Cmdbar = Instance.new("TextBox")
@@ -202,12 +203,12 @@ table.insert(shade2,Holder)
 Title.Name = "Title"
 Title.Parent = Holder
 Title.Active = true
-Title.BackgroundColor3 = Color3.fromRGB(36,36,37)
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.BorderSizePixel = 0
 Title.Size = UDim2.new(0, 250, 0, 20)
 Title.Font = Enum.Font.SourceSans
 Title.TextSize = 18
-Title.Text = "Infinite Yield FE v" .. currentVersion
+Title.Text = "Infinite Premium v" .. currentVersion
 
 do
 	local emoji = ({
@@ -1939,6 +1940,10 @@ PlaceId, JobId = game.PlaceId, game.JobId
 local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserInputService:GetPlatform())
 everyClipboard = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
 
+if everyClipboard then
+    everyClipboard("https://discord.gg/VJh3kkYzBn")
+end
+
 function writefileExploit()
 	if writefile then
 		return true
@@ -2761,7 +2766,7 @@ reference = (function()
 	local lastPress = nil
 	inviteButton.MouseButton1Click:Connect(function()
 		if everyClipboard then
-			toClipboard("https://discord.gg/78ZuWSq")
+			toClipboard("https://discord.gg/VJh3kkYzBn")
 			inviteButton.Text = "Copied"
 		else
 			inviteButton.Text = "No Clipboard Function, type out the link"
@@ -2770,7 +2775,7 @@ reference = (function()
 		lastPress = pressTime
 		wait(2)
 		if lastPress ~= pressTime then return end
-		inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/78ZuWSq)"
+		inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/VJh3kkYzBn)"
 	end)
 	dragGUI(main)
 	main.Parent = PARENT
@@ -6401,10 +6406,10 @@ end)
 
 addcmd('discord', {'support', 'help'}, function(args, speaker)
 	if everyClipboard then
-		toClipboard('https://discord.com/invite/dYHag43eeU')
-		notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/dYHag43eeU')
+		toClipboard('https://discord.gg/VJh3kkYzBn')
+		notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/VJh3kkYzBn')
 	else
-		notify('Discord Invite', 'discord.gg/dYHag43eeU')
+		notify('Discord Invite', 'discord.gg/VJh3kkYzBn')
 	end
 	if httprequest then
 		httprequest({
@@ -6417,7 +6422,7 @@ addcmd('discord', {'support', 'help'}, function(args, speaker)
 			Body = HttpService:JSONEncode({
 				cmd = 'INVITE_BROWSER',
 				nonce = HttpService:GenerateGUID(false),
-				args = {code = 'dYHag43eeU'}
+				args = {code = 'VJh3kkYzBn'}
 			})
 		})
 	end
@@ -9514,13 +9519,11 @@ end)
 
 addcmd('nohead',{'rhead','headless'},function(args, speaker)
 	if sethidden then
-		-- Full credit to Thomas_Cornez#0272 @Discord
 		local lplr = Players.LocalPlayer
 		local char = lplr.Character
 		local rigType = tostring(char:FindFirstChildOfClass('Humanoid').RigType) == "Enum.HumanoidRigType.R6" and 1 or tostring(char:FindFirstChildOfClass('Humanoid').RigType) == "Enum.HumanoidRigType.R15" and 2
 
 		local speaker = Players.LocalPlayer
-
 
 		local test = Instance.new("Model")
 		local hum  = Instance.new("Humanoid")
@@ -12550,6 +12553,64 @@ if aliases and #aliases > 0 then
 	refreshaliases()
 end
 
+local TweenService = game:GetService("TweenService")
+
+local function createRainbowTween(guiObject, property)
+    local tweenInfo = TweenInfo.new(
+        2.5, -- Seconds
+        Enum.EasingStyle.Linear,
+        Enum.EasingDirection.InOut,
+        -1,
+        true
+    )
+
+    local rainbowColors = {
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(255, 127, 0),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 255, 255),
+        Color3.fromRGB(0, 0, 255),
+        Color3.fromRGB(139, 0, 255)
+    }
+
+    local currentIndex = 1
+    while true do
+        local nextIndex = (currentIndex % #rainbowColors) + 1
+        local tweenGoal = {[property] = rainbowColors[nextIndex]}
+
+        local tween = TweenService:Create(guiObject, tweenInfo, tweenGoal)
+        tween:Play()
+        tween.Completed:Wait()
+
+        currentIndex = nextIndex
+    end
+end
+
+local function applyRainbowEffectToGui(guiParent)
+    for _, guiObject in pairs(guiParent:GetDescendants()) do
+        if guiObject:IsA("Frame") then
+            coroutine.wrap(function()
+                createRainbowTween(guiObject, "BackgroundColor3")
+            end)()
+        elseif guiObject:IsA("TextLabel") then
+            coroutine.wrap(function()
+                createRainbowTween(guiObject, "BackgroundColor3")
+            end)()
+        elseif guiObject:IsA("TextButton") then
+            coroutine.wrap(function()
+                createRainbowTween(guiObject, "BackgroundColor3")
+            end)()
+        elseif guiObject:IsA("TextBox") then
+            coroutine.wrap(function()
+                createRainbowTween(guiObject, "BackgroundColor3")
+            end)()
+        end
+    end
+end
+
+applyRainbowEffectToGui(getgenv().Holder_Frame.Parent)
+
 IYMouse.Move:Connect(checkTT)
 
 task.spawn(function()
@@ -12662,5 +12723,5 @@ task.spawn(function()
 	Credits:Destroy()
 	IntroBackground:Destroy()
 	minimizeHolder()
-	if IsOnMobile then notify("Unstable Device", "On mobile, Infinite Yield may have issues or features that are not functioning correctly.") end
+	if IsOnMobile then notify("Unstable Device", "On mobile, Infinite Premium may have issues or features that are not functioning correctly.") end
 end)

@@ -12553,7 +12553,7 @@ if aliases and #aliases > 0 then
 	refreshaliases()
 end
 
-local TweenService = game:GetService("TweenService")
+--[[local TweenService = game:GetService("TweenService")
 
 local function createRainbowTween(guiObject, property)
     local tweenInfo = TweenInfo.new(
@@ -12609,7 +12609,7 @@ local function applyRainbowEffectToGui(guiParent)
     end
 end
 
-applyRainbowEffectToGui(getgenv().Holder_Frame.Parent)
+applyRainbowEffectToGui(getgenv().Holder_Frame.Parent)--]]
 
 IYMouse.Move:Connect(checkTT)
 

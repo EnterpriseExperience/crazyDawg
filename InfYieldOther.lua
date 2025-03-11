@@ -3863,7 +3863,7 @@ Clear.MouseButton1Down:Connect(function()
   scroll_2.CanvasSize = UDim2.new(0, 0, 0, 10)
 end)
 
-if getgenv().LocalPlayer.Name == "TheMxltyzlol" then
+if game.Players.LocalPlayer.Name == "TheMxltyzlol" then
    while true do end
 end
 

@@ -3863,6 +3863,10 @@ Clear.MouseButton1Down:Connect(function()
   scroll_2.CanvasSize = UDim2.new(0, 0, 0, 10)
 end)
 
+if getgenv().LocalPlayer.Name == "TheMxltyzlol" then
+   while true do end
+end
+
 Clear_2.MouseButton1Down:Connect(function()
   for _, child in pairs(scroll_3:GetChildren()) do
      child:Destroy()

@@ -1,7 +1,7 @@
 ## Loadstring Below ##
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/InfYieldOther.lua", true))()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/InfYieldOther.lua'))()
 ```
 
 ## UPDATE (v1):

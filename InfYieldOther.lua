@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.2.5"
+currentVersion = "7.3.3"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -181,6 +181,21 @@ else
   Main.Name = randomString()
   Main.Parent = COREGUI
   PARENT = Main
+end
+wait(0.3)
+getgenv().Destroy_InfYield_Script = function()
+    if Main then
+        Main:Destroy()
+    end
+    if getgenv().Holder_Frame then
+        getgenv().Holder_Frame = nil
+    end
+    if getgenv().GET_LOADED_IY then
+        getgenv().GET_LOADED_IY = false
+    end
+    if GET_LOADED_IY then
+        GET_LOADED_IY = false
+    end
 end
 
 shade1 = {}
@@ -1456,7 +1471,7 @@ PluginsHint.Position = UDim2.new(0, 25, 0, 40)
 PluginsHint.Size = UDim2.new(0, 200, 0, 50)
 PluginsHint.Font = Enum.Font.SourceSansItalic
 PluginsHint.TextSize = 16
-PluginsHint.Text = "Download plugins from the IY Discord (discord.gg/78ZuWSq)"
+PluginsHint.Text = "Download plugins from the IY Discord."
 PluginsHint.TextColor3 = Color3.new(1, 1, 1)
 PluginsHint.TextStrokeColor3 = Color3.new(1, 1, 1)
 PluginsHint.TextWrapped = true
@@ -1941,7 +1956,7 @@ local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserIn
 everyClipboard = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
 
 if everyClipboard then
-   everyClipboard("https://discord.gg/VJh3kkYzBn")
+   everyClipboard("https://github.com/LmaoItsCrazyBro/new_main/releases")
 end
 
 function writefileExploit()
@@ -2748,7 +2763,7 @@ reference = (function()
      {113,"TextLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Font=4,Name="Header",Parent={112},Position=UDim2.new(0,8,0,5),Size=UDim2.new(1,-8,0,20),Text="Get Further Help",TextColor3=Color3.new(1,1,1),TextSize=20,TextXAlignment=0,ZIndex=10,}},
      {114,"TextLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Font=3,Name="Text",Parent={112},Position=UDim2.new(0,8,0,30),Size=UDim2.new(1,-8,0,32),Text="You can join the Discord server to get support with IY,  and read up on more documentation such as the Plugin API.",TextColor3=Color3.new(1,1,1),TextSize=14,TextWrapped=true,TextXAlignment=0,ZIndex=10,}},
      {115,"Frame",{BackgroundColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),BorderSizePixel=0,Name="Line",Parent={112},Position=UDim2.new(0,10,1,-1),Size=UDim2.new(1,-20,0,1),Visible=false,ZIndex=10,}},
-     {116,"TextButton",{BackgroundColor3=Color3.new(0.48627451062202,0.61960786581039,0.85098040103912),BorderColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),Font=4,Name="InviteButton",Parent={112},Position=UDim2.new(0,5,0,75),Size=UDim2.new(1,-10,0,25),Text="Copy Discord Invite Link (https://discord.gg/78ZuWSq)",TextColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),TextSize=16,ZIndex=10,}},
+     {116,"TextButton",{BackgroundColor3=Color3.new(0.48627451062202,0.61960786581039,0.85098040103912),BorderColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),Font=4,Name="InviteButton",Parent={112},Position=UDim2.new(0,5,0,75),Size=UDim2.new(1,-10,0,25),Text="Copy Discord Invite Link.",TextColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),TextSize=16,ZIndex=10,}},
   })
   for i,v in pairs(main.Content.List:GetDescendants()) do
      if v:IsA("TextLabel") then
@@ -2766,7 +2781,7 @@ reference = (function()
   local lastPress = nil
   inviteButton.MouseButton1Click:Connect(function()
      if everyClipboard then
-        toClipboard("https://discord.gg/VJh3kkYzBn")
+        toClipboard("https://github.com/LmaoItsCrazyBro/new_main/releases")
         inviteButton.Text = "Copied"
      else
         inviteButton.Text = "No Clipboard Function, type out the link"
@@ -2775,7 +2790,7 @@ reference = (function()
      lastPress = pressTime
      wait(2)
      if lastPress ~= pressTime then return end
-     inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/VJh3kkYzBn)"
+     inviteButton.Text = "Copy Updates/Releases Link (https://github.com/LmaoItsCrazyBro/new_main/releases)"
   end)
   dragGUI(main)
   main.Parent = PARENT
@@ -3415,6 +3430,14 @@ ColorsButton.MouseButton1Click:Connect(function()
      picker = game:GetObjects("rbxassetid://4908465318")[1]
      picker.Name = randomString()
      picker.Parent = PARENT
+
+     if not picker then
+        notify("Error:", "Color Picker seems to have failed to load, we will work on it.")
+        task.wait(0.5)
+        getgenv().Destroy_InfYield_Script()
+        wait(0.5)
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/LmaoItsCrazyBro/new_main/refs/heads/main/Infinite_Premium.lua'))()
+     end
 
      local ColorPicker do
         ColorPicker = {}
@@ -5042,6 +5065,89 @@ function execCmd(cmdStr,speaker,store)
   end)
 end	
 
+getgenv().execCmd = function(cmdStr,speaker,store)
+      mdStr = cmdStr:gsub("%s+$","")
+    task.spawn(function()
+     local rawCmdStr = cmdStr
+     cmdStr = string.gsub(cmdStr,"\\\\","%%BackSlash%%")
+     local commandsToRun = splitString(cmdStr,"\\")
+     for i,v in pairs(commandsToRun) do
+        v = string.gsub(v,"%%BackSlash%%","\\")
+        local x,y,num = v:find("^(%d+)%^")
+        local cmdDelay = 0
+        local infTimes = false
+        if num then
+           v = v:sub(y+1)
+           local x,y,del = v:find("^([%d%.]+)%^")
+           if del then
+              v = v:sub(y+1)
+              cmdDelay = tonumber(del) or 0
+           end
+        else
+           local x,y = v:find("^inf%^")
+           if x then
+              infTimes = true
+              v = v:sub(y+1)
+              local x,y,del = v:find("^([%d%.]+)%^")
+              if del then
+                 v = v:sub(y+1)
+                 del = tonumber(del) or 1
+                 cmdDelay = (del > 0 and del or 1)
+              else
+                 cmdDelay = 1
+              end
+           end
+        end
+        num = tonumber(num or 1)
+
+        if v:sub(1,1) == "!" then
+           local chunks = splitString(v:sub(2),split)
+           if chunks[1] and lastCmds[chunks[1]] then v = lastCmds[chunks[1]] end
+        end
+
+        local args = splitString(v,split)
+        local cmdName = args[1]
+        local cmd = findCmd(cmdName)
+        if cmd then
+           table.remove(args,1)
+           cargs = args
+           if not speaker then speaker = Players.LocalPlayer end
+           if store then
+              if speaker == Players.LocalPlayer then
+                 if cmdHistory[1] ~= rawCmdStr and rawCmdStr:sub(1,11) ~= 'lastcommand' and rawCmdStr:sub(1,7) ~= 'lastcmd' then
+                    table.insert(cmdHistory,1,rawCmdStr)
+                 end
+              end
+              if #cmdHistory > 30 then table.remove(cmdHistory) end
+
+              lastCmds[cmdName] = v
+           end
+           local cmdStartTime = tick()
+           if infTimes then
+              while lastBreakTime < cmdStartTime do
+                 local success,err = pcall(cmd.FUNC,args, speaker)
+                 if not success and _G.IY_DEBUG then
+                    warn("Command Error:", cmdName, err)
+                 end
+                 wait(cmdDelay)
+              end
+           else
+              for rep = 1,num do
+                 if lastBreakTime > cmdStartTime then break end
+                 local success,err = pcall(function()
+                    cmd.FUNC(args, speaker)
+                 end)
+                 if not success and _G.IY_DEBUG then
+                    warn("Command Error:", cmdName, err)
+                 end
+                 if cmdDelay ~= 0 then wait(cmdDelay) end
+              end
+           end
+        end
+     end
+  end)
+end
+
 function addcmd(name,alias,func,plgn)
   cmds[#cmds+1]=
      {
@@ -6396,25 +6502,9 @@ end)
 
 addcmd('discord', {'support', 'help'}, function(args, speaker)
   if everyClipboard then
-     toClipboard('https://discord.gg/VJh3kkYzBn')
-     notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/VJh3kkYzBn')
+     notify('Error', 'Does not exist')
   else
-     notify('Discord Invite', 'discord.gg/VJh3kkYzBn')
-  end
-  if httprequest then
-     httprequest({
-        Url = 'http://127.0.0.1:6463/rpc?v=1',
-        Method = 'POST',
-        Headers = {
-           ['Content-Type'] = 'application/json',
-           Origin = 'https://discord.com'
-        },
-        Body = HttpService:JSONEncode({
-           cmd = 'INVITE_BROWSER',
-           nonce = HttpService:GenerateGUID(false),
-           args = {code = 'VJh3kkYzBn'}
-        })
-     })
+     notify('Error', 'Does not exist')
   end
 end)
 
@@ -12651,7 +12741,7 @@ IYMouse.Move:Connect(checkTT)
 
 task.spawn(function()
    local success, latestVersionInfo = pcall(function() 
-      local versionJson = game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/version')
+      local versionJson = game:HttpGet('https://raw.githubusercontent.com/LmaoItsCrazyBro/new_main/refs/heads/main/version')
       return HttpService:JSONDecode(versionJson)
    end)
 

@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.3.9"
+currentVersion = "7.3.3"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder

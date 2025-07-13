@@ -12605,7 +12605,7 @@ IYMouse.Move:Connect(checkTT)
 
 task.spawn(function()
    local success, latestVersionInfo = pcall(function() 
-      local versionJson = game:HttpGet('https://raw.githubusercontent.com/Enterprise_Experience/crazyDawg/refs/heads/main/version')
+      local versionJson = game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/version')
       return HttpService:JSONDecode(versionJson)
    end)
 

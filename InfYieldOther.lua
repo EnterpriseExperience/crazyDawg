@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.3.9"
+currentVersion = "7.4.2"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -1972,8 +1972,10 @@ function isNumber(str)
 end
 
 function getRoot(char)
-  local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
-  return rootPart
+   return char:FindFirstChild("HumanoidRootPart")
+      or char:FindFirstChild("Torso")
+      or char:FindFirstChild("UpperTorso")
+      or (char.PrimaryPart and char.PrimaryPart)
 end
 
 function tools(plr)
@@ -9754,44 +9756,31 @@ addcmd("sit", {}, function(args, speaker)
 end)
 
 addcmd("lay", {"laydown"}, function(args, speaker)
-  local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-  humanoid.Sit = true
-  task.wait(0.1)
-  humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
-  for _, v in ipairs(humanoid:GetPlayingAnimationTracks()) do
-     v:Stop()
-  end
+	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	humanoid.Sit = true
+	task.wait(0.1)
+	humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
+	for _, v in ipairs(humanoid:GetPlayingAnimationTracks()) do
+		v:Stop()
+	end
 end)
 
 addcmd("sitwalk", {}, function(args, speaker)
-  local anims = speaker.Character.Animate
-  local sit = anims.sit:FindFirstChildWhichIsA("Animation").AnimationId
-  anims.idle:FindFirstChildWhichIsA("Animation").AnimationId = sit
-  anims.walk:FindFirstChildWhichIsA("Animation").AnimationId = sit
-  anims.run:FindFirstChildWhichIsA("Animation").AnimationId = sit
-  anims.jump:FindFirstChildWhichIsA("Animation").AnimationId = sit
-  speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
+   local anims = speaker.Character.Animate
+   local sit = anims.sit:FindFirstChildWhichIsA("Animation").AnimationId
+   anims.idle:FindFirstChildWhichIsA("Animation").AnimationId = sit
+   anims.walk:FindFirstChildWhichIsA("Animation").AnimationId = sit
+   anims.run:FindFirstChildWhichIsA("Animation").AnimationId = sit
+   anims.jump:FindFirstChildWhichIsA("Animation").AnimationId = sit
+   speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
-function noSitFunc()
-  wait()
-  if Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Sit then
-     Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Sit = false
-  end
-end
 addcmd("nosit", {}, function(args, speaker)
-  if noSit then noSit:Disconnect() nositDied:Disconnect() end
-  noSit = Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):GetPropertyChangedSignal("Sit"):Connect(noSitFunc)
-  local function nositDiedFunc()
-     repeat wait() until speaker.Character ~= nil and speaker.Character:FindFirstChildOfClass("Humanoid")
-     noSit:Disconnect()
-     noSit = Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):GetPropertyChangedSignal("Sit"):Connect(noSitFunc)
-  end
-  nositDied = speaker.CharacterAdded:Connect(nositDiedFunc)
+   speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 end)
 
 addcmd("unnosit", {}, function(args, speaker)
-  if noSit then noSit:Disconnect() nositDied:Disconnect() end
+  speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, true)
 end)
 
 addcmd("jump", {}, function(args, speaker)
@@ -9801,29 +9790,29 @@ end)
 local infJump
 infJumpDebounce = false
 addcmd("infjump", {"infinitejump"}, function(args, speaker)
-  if infJump then infJump:Disconnect() end
-  infJumpDebounce = false
-  infJump = UserInputService.JumpRequest:Connect(function()
-     if not infJumpDebounce then
-        infJumpDebounce = true
-        speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-        wait()
-        infJumpDebounce = false
-     end
-  end)
+   if infJump then infJump:Disconnect() end
+   infJumpDebounce = false
+   infJump = UserInputService.JumpRequest:Connect(function()
+      if not infJumpDebounce then
+         infJumpDebounce = true
+         speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+         wait()
+         infJumpDebounce = false
+      end
+   end)
 end)
 
 addcmd("uninfjump", {"uninfinitejump", "noinfjump", "noinfinitejump"}, function(args, speaker)
-  if infJump then infJump:Disconnect() end
-  infJumpDebounce = false
+   if infJump then infJump:Disconnect() end
+   infJumpDebounce = false
 end)
 
 local flyjump
 addcmd("flyjump", {}, function(args, speaker)
-  if flyjump then flyjump:Disconnect() end
-  flyjump = UserInputService.JumpRequest:Connect(function()
-     speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-  end)
+   if flyjump then flyjump:Disconnect() end
+   flyjump = UserInputService.JumpRequest:Connect(function()
+      speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+   end)
 end)
 
 addcmd("unflyjump", {"noflyjump"}, function(args, speaker)
@@ -10362,126 +10351,125 @@ addcmd('explorer', {'dex'}, function(args, speaker)
 end)
 
 addcmd('olddex', {'odex'}, function(args, speaker)
-  notify('Loading old explorer', 'Hold on a sec')
+	notify('Loading old explorer', 'Hold on a sec')
 
-  local getobjects = function(a)
-     local Objects = {}
-     if a then
-        local b = InsertService:LoadLocalAsset(a)
-        if b then 
-           table.insert(Objects, b) 
-        end
-     end
-     return Objects
-  end
+	local getobjects = function(a)
+		local Objects = {}
+		if a then
+			local b = InsertService:LoadLocalAsset(a)
+			if b then 
+				table.insert(Objects, b) 
+			end
+		end
+		return Objects
+	end
 
-  local Dex = getobjects("rbxassetid://10055842438")[1]
-  Dex.Parent = PARENT
+	local Dex = getobjects("rbxassetid://10055842438")[1]
+	Dex.Parent = PARENT
 
-  local function Load(Obj, Url)
-     local function GiveOwnGlobals(Func, Script)
-        -- Fix for this edit of dex being poorly made
-        -- I (Alex) would like to commemorate whoever added this dex in somehow finding the worst dex to ever exist
-        local Fenv, RealFenv, FenvMt = {}, {
-           script = Script,
-           getupvalue = function(a, b)
-              return nil -- force it to use globals
-           end,
-           getreg = function() -- It loops registry for some idiotic reason so stop it from doing that and just use a global
-              return {} -- force it to use globals
-           end,
-           getprops = getprops or function(inst)
-              if getproperties then
-                 local props = getproperties(inst)
-                 if props[1] and gethiddenproperty then
-                    local results = {}
-                    for _,name in pairs(props) do
-                       local success, res = pcall(gethiddenproperty, inst, name)
-                       if success then
-                          results[name] = res
-                       end
-                    end
+	local function Load(Obj, Url)
+		local function GiveOwnGlobals(Func, Script)
+			local Fenv, RealFenv, FenvMt = {}, {
+				script = Script,
+				getupvalue = function(a, b)
+					return nil
+				end,
+				getreg = function()
+					return {}
+				end,
+				getprops = getprops or function(inst)
+					if getproperties then
+						local props = getproperties(inst)
+						if props[1] and gethiddenproperty then
+							local results = {}
+							for _,name in pairs(props) do
+								local success, res = pcall(gethiddenproperty, inst, name)
+								if success then
+									results[name] = res
+								end
+							end
 
-                    return results
-                 end
+							return results
+						end
 
-                 return props
-              end
+						return props
+					end
 
-              return {}
-           end
-        }, {}
-        FenvMt.__index = function(a,b)
-           return RealFenv[b] == nil and getgenv()[b] or RealFenv[b]
-        end
-        FenvMt.__newindex = function(a, b, c)
-           if RealFenv[b] == nil then 
-              getgenv()[b] = c 
-           else 
-              RealFenv[b] = c 
-           end
-        end
-        setmetatable(Fenv, FenvMt)
-        pcall(setfenv, Func, Fenv)
-        return Func
-     end
+					return {}
+				end
+			}, {}
+			FenvMt.__index = function(a,b)
+				return RealFenv[b] == nil and getgenv()[b] or RealFenv[b]
+			end
+			FenvMt.__newindex = function(a, b, c)
+				if RealFenv[b] == nil then 
+					getgenv()[b] = c 
+				else 
+					RealFenv[b] = c 
+				end
+			end
+			setmetatable(Fenv, FenvMt)
+			pcall(setfenv, Func, Fenv)
+			return Func
+		end
 
-     local function LoadScripts(_, Script)
-        if Script:IsA("LocalScript") then
-           task.spawn(function()
-              GiveOwnGlobals(loadstring(Script.Source,"="..Script:GetFullName()), Script)()
-           end)
-        end
-        table.foreach(Script:GetChildren(), LoadScripts)
-     end
+		local function LoadScripts(_, Script)
+			if Script:IsA("LocalScript") then
+				task.spawn(function()
+					GiveOwnGlobals(loadstring(Script.Source,"="..Script:GetFullName()), Script)()
+				end)
+			end
+			table.foreach(Script:GetChildren(), LoadScripts)
+		end
 
-     LoadScripts(nil, Obj)
-  end
+		LoadScripts(nil, Obj)
+	end
 
-  Load(Dex)
+	Load(Dex)
 end)
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
-  notify("Loading",'Hold on a sec')
-  -- Full credit to exx, creator of SimpleSpy
-  -- also thanks to NoobSploit for fixing
-  loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))()
+   notify("Loading",'Hold on a sec')
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))()
 end)
 
 addcmd('audiologger',{'alogger'},function(args, speaker)
-  notify("Loading",'Hold on a sec')
-  loadstring(game:HttpGet(('https://raw.githubusercontent.com/infyiff/backup/main/audiologger.lua'),true))()
+   notify("Loading",'Hold on a sec')
+   loadstring(game:HttpGet(('https://raw.githubusercontent.com/infyiff/backup/main/audiologger.lua'),true))()
 end)
 
 local loopgoto = nil
-addcmd('loopgoto',{},function(args, speaker)
-  local players = getPlayer(args[1], speaker)
-  for i,v in pairs(players)do
-     loopgoto = nil
-     if speaker.Character:FindFirstChildOfClass('Humanoid') and speaker.Character:FindFirstChildOfClass('Humanoid').SeatPart then
-        speaker.Character:FindFirstChildOfClass('Humanoid').Sit = false
-        wait(.1)
-     end
-     loopgoto = Players[v]
-     local distance = 3
-     if args[2] and isNumber(args[2]) then
-        distance = args[2]
-     end
-     local lDelay = 0
-     if args[3] and isNumber(args[3]) then
-        lDelay = args[3]
-     end
-     repeat
-        if Players:FindFirstChild(v) then
-           if Players[v].Character ~= nil then
-              getRoot(speaker.Character).CFrame = getRoot(Players[v].Character).CFrame + Vector3.new(distance,1,0)
-           end
-           wait(lDelay)
-        else
-           loopgoto = nil
-        end
-     until loopgoto ~= Players[v]
-  end
+addcmd('loopgoto', {}, function(args, speaker)
+   local players = getPlayer(args[1], speaker)
+   for _, v in pairs(players) do
+      loopgoto = nil
+      local humanoid = speaker.Character and speaker.Character:FindFirstChildOfClass('Humanoid')
+      if humanoid then
+         speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+         wait()
+      end
+
+      loopgoto = Players[v]
+      local distance = tonumber(args[2]) or 3
+      local lDelay = tonumber(args[3]) or 0
+
+      repeat
+         local targetPlayer = Players:FindFirstChild(v)
+         local myRoot = getRoot(speaker.Character)
+
+         if targetPlayer and targetPlayer.Character then
+            local targetRoot = getRoot(targetPlayer.Character)
+
+            if myRoot and targetRoot and targetRoot.Position.Y > -1000 then
+               myRoot.CFrame = targetRoot.CFrame + Vector3.new(distance, 1, 0)
+            end
+         else
+            loopgoto = nil
+         end
+
+         wait(lDelay)
+      until loopgoto ~= Players[v]
+   end
 end)
 
 addcmd('unloopgoto',{'noloopgoto'},function(args, speaker)

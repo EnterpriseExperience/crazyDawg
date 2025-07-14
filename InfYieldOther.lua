@@ -9642,73 +9642,73 @@ addcmd("undance", {"nodance"}, function(args, speaker)
 end)
 
 addcmd('nolimbs',{'rlimbs'},function(args, speaker)
-  if r15(speaker) then
-     for i,v in pairs(speaker.Character:GetChildren()) do
-        if v:IsA("BasePart") and
-           v.Name == "RightUpperLeg" or
-           v.Name == "LeftUpperLeg" or
-           v.Name == "RightUpperArm" or
-           v.Name == "LeftUpperArm" then
-           v:Destroy()
-        end
-     end
-  else
-     for i,v in pairs(speaker.Character:GetChildren()) do
-        if v:IsA("BasePart") and
-           v.Name == "Right Leg" or
-           v.Name == "Left Leg" or
-           v.Name == "Right Arm" or
-           v.Name == "Left Arm" then
-           v:Destroy()
-        end
-     end
-  end
+   if r15(speaker) then
+      for i,v in pairs(speaker.Character:GetChildren()) do
+         if v:IsA("BasePart") and
+            v.Name == "RightUpperLeg" or
+            v.Name == "LeftUpperLeg" or
+            v.Name == "RightUpperArm" or
+            v.Name == "LeftUpperArm" then
+            v:Destroy()
+         end
+      end
+   else
+      for i,v in pairs(speaker.Character:GetChildren()) do
+         if v:IsA("BasePart") and
+            v.Name == "Right Leg" or
+            v.Name == "Left Leg" or
+            v.Name == "Right Arm" or
+            v.Name == "Left Arm" then
+            v:Destroy()
+         end
+      end
+   end
 end)
 
 addcmd('nohead',{'rhead','headless'},function(args, speaker)
-  if sethidden then
-     local lplr = Players.LocalPlayer
-     local char = lplr.Character
-     local rigType = tostring(char:FindFirstChildOfClass('Humanoid').RigType) == "Enum.HumanoidRigType.R6" and 1 or tostring(char:FindFirstChildOfClass('Humanoid').RigType) == "Enum.HumanoidRigType.R15" and 2
+   if sethidden then
+      local lplr = Players.LocalPlayer
+      local char = lplr.Character
+      local rigType = tostring(char:FindFirstChildOfClass('Humanoid').RigType) == "Enum.HumanoidRigType.R6" and 1 or tostring(char:FindFirstChildOfClass('Humanoid').RigType) == "Enum.HumanoidRigType.R15" and 2
 
-     local speaker = Players.LocalPlayer
+      local speaker = Players.LocalPlayer
 
-     local test = Instance.new("Model")
-     local hum  = Instance.new("Humanoid")
-     local animation = Instance.new("Model")
-     local humanoidanimation = Instance.new("Humanoid")
-     test.Parent = workspace
-     hum.Parent = test
-     animation.Parent = workspace
-     humanoidanimation.Parent = animation
+      local test = Instance.new("Model")
+      local hum  = Instance.new("Humanoid")
+      local animation = Instance.new("Model")
+      local humanoidanimation = Instance.new("Humanoid")
+      test.Parent = workspace
+      hum.Parent = test
+      animation.Parent = workspace
+      humanoidanimation.Parent = animation
 
-     lplr.Character = test
-     wait(2)
-     char:FindFirstChildOfClass('Humanoid').Animator.Parent = humanoidanimation
-     char:FindFirstChildOfClass('Humanoid'):Destroy()
+      lplr.Character = test
+      wait(2)
+      char:FindFirstChildOfClass('Humanoid').Animator.Parent = humanoidanimation
+      char:FindFirstChildOfClass('Humanoid'):Destroy()
 
-     char.Head:Destroy()
-     wait(5)
-     Players.LocalPlayer.Character = char
+      char.Head:Destroy()
+      wait(5)
+      Players.LocalPlayer.Character = char
 
-     local hum2 = Instance.new("Humanoid")
-     hum2.Parent = char
-     char:FindFirstChildOfClass("Humanoid").Jump = true
+      local hum2 = Instance.new("Humanoid")
+      hum2.Parent = char
+      char:FindFirstChildOfClass("Humanoid").Jump = true
 
-     humanoidanimation.Animator.Parent = hum2
-     char.Animate.Disabled = true
-     wait()
-     char.Animate.Disabled = false
-     wait()
+      humanoidanimation.Animator.Parent = hum2
+      char.Animate.Disabled = true
+      wait()
+      char.Animate.Disabled = false
+      wait()
 
-     if rig == 1 then
-        hum2.HipHeight = 0
-     elseif rig == 2 then
-        hum2.HipHeight = 2.19
-     end
-  else
-     notify('Incompatible Exploit','Your exploit does not support this command (missing sethiddenproperty)')
-  end
+      if rig == 1 then
+         hum2.HipHeight = 0
+      elseif rig == 2 then
+         hum2.HipHeight = 2.19
+      end
+   else
+      notify('Incompatible Exploit','Your exploit does not support this command (missing sethiddenproperty)')
+   end
 end)
 
 addcmd('noarms',{'rarms'},function(args, speaker)
@@ -9752,21 +9752,33 @@ addcmd('nolegs',{'rlegs'},function(args, speaker)
 end)
 
 addcmd("sit", {}, function(args, speaker)
-  speaker.Character:FindFirstChildWhichIsA("Humanoid").Sit = true
+   local Character = speaker.Character or speaker.CharacterAdded:Wait()
+   local Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid") or Character:WaitForChild("Humanoid", 1) or Character:FindFirstChild("Humanoid", true) or Character:FindFirstChildOfClass("Humanoid")
+
+   if Humanoid then
+      Humanoid.Sit = true
+   end
 end)
 
 addcmd("lay", {"laydown"}, function(args, speaker)
-	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-	humanoid.Sit = true
-	task.wait(0.1)
-	humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
-	for _, v in ipairs(humanoid:GetPlayingAnimationTracks()) do
-		v:Stop()
-	end
+	local Character = speaker.Character or speaker.CharacterAdded:Wait()
+   local humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid") or Character:WaitForChild("Humanoid", 1) or Character:FindFirstChild("Humanoid", true) or Character:FindFirstChildOfClass("Humanoid")
+
+   if humanoid then
+      humanoid.Sit = true
+      task.wait(0.1)
+      humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
+      for _, v in ipairs(humanoid:GetPlayingAnimationTracks()) do
+         v:Stop()
+      end
+   end
 end)
 
 addcmd("sitwalk", {}, function(args, speaker)
-   local anims = speaker.Character.Animate
+   local Character = speaker.Character or speaker.CharacterAdded:Wait()
+   if not Character:FindFirstChild("Animate") then return end
+   wait()
+   local anims = Character:FindFirstChild("Animate")
    local sit = anims.sit:FindFirstChildWhichIsA("Animation").AnimationId
    anims.idle:FindFirstChildWhichIsA("Animation").AnimationId = sit
    anims.walk:FindFirstChildWhichIsA("Animation").AnimationId = sit
@@ -9775,16 +9787,93 @@ addcmd("sitwalk", {}, function(args, speaker)
    speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
+local _anti_sit_conn
+local _anti_sit_anim_conn
 addcmd("nosit", {}, function(args, speaker)
-   speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+   getgenv().ANTI_SIT_ENABLED = true
+   local Character = speaker.Character or speaker.CharacterAdded:Wait()
+   local Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid") or Character:WaitForChild("Humanoid", 1) or Character:FindFirstChild("Humanoid", true) or Character:FindFirstChildOfClass("Humanoid")
+
+   local function run_anti_sit()
+      task.spawn(function()
+         while getgenv().ANTI_SIT_ENABLED == true do
+            if Humanoid.Sit then
+               Humanoid.Sit = false
+            end
+            task.wait()
+         end
+      end)
+
+      getgenv().Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+      wait(0.1)
+      if _anti_sit_conn then
+         _anti_sit_conn:Disconnect()
+      end
+      wait()
+      _anti_sit_conn = Humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
+         if not getgenv().ANTI_SIT_ENABLED then return end
+
+         if Humanoid.Sit then
+            local hrp = getRoot(Character)
+            for _, v in pairs(hrp:GetChildren()) do
+               if v:IsA("Weld") and v.Name == "SeatWeld" then
+                  v:Destroy()
+               end
+            end
+
+            Humanoid:ChangeState(3)
+            Humanoid.Sit = false
+         end
+      end)
+
+      for _, track in pairs(getgenv().Humanoid:GetPlayingAnimationTracks()) do
+         if track.Name:lower():find("sit") then
+            track:Stop()
+         end
+      end
+
+      if _anti_sit_anim_conn then
+         _anti_sit_anim_conn:Disconnect()
+      end
+
+      _anti_sit_anim_conn = Humanoid.AnimationPlayed:Connect(function(track)
+         if not getgenv().ANTI_SIT_ENABLED then return end
+         if track.Name:lower():find("sit") then
+            task.defer(function()
+               track:Stop()
+            end)
+         end
+      end)
+   end
+   wait()
+   run_anti_sit()
 end)
 
 addcmd("unnosit", {}, function(args, speaker)
-  speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+   getgenv().ANTI_SIT_ENABLED = false
+
+   if _anti_sit_conn then
+      _anti_sit_conn:Disconnect()
+      _anti_sit_conn = nil
+   end
+
+   if _anti_sit_anim_conn then
+      _anti_sit_anim_conn:Disconnect()
+      _anti_sit_anim_conn = nil
+   end
+
+   if Humanoid then
+      Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+   end
 end)
 
 addcmd("jump", {}, function(args, speaker)
-  speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+   local Character = speaker.Character or speaker.CharacterAdded:Wait()
+   local Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid") or Character:WaitForChild("Humanoid", 1) or Character:FindFirstChild("Humanoid", true) or Character:FindFirstChildOfClass("Humanoid")
+
+   if Humanoid then
+      Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+   end
 end)
 
 local infJump

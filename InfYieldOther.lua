@@ -9787,84 +9787,25 @@ addcmd("sitwalk", {}, function(args, speaker)
    speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
-local _anti_sit_conn
-local _anti_sit_anim_conn
+function noSitFunc()
+  wait()
+  if Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Sit then
+     Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Sit = false
+  end
+end
 addcmd("nosit", {}, function(args, speaker)
-   getgenv().ANTI_SIT_ENABLED = true
-   local Character = speaker.Character or speaker.CharacterAdded:Wait()
-   local Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid") or Character:WaitForChild("Humanoid", 1) or Character:FindFirstChild("Humanoid", true) or Character:FindFirstChildOfClass("Humanoid")
-
-   local function run_anti_sit()
-      task.spawn(function()
-         while getgenv().ANTI_SIT_ENABLED == true do
-            if Humanoid.Sit then
-               Humanoid.Sit = false
-            end
-            task.wait()
-         end
-      end)
-
-      getgenv().Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-      wait(0.1)
-      if _anti_sit_conn then
-         _anti_sit_conn:Disconnect()
-      end
-      wait()
-      _anti_sit_conn = Humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
-         if not getgenv().ANTI_SIT_ENABLED then return end
-
-         if Humanoid.Sit then
-            local hrp = getRoot(Character)
-            for _, v in pairs(hrp:GetChildren()) do
-               if v:IsA("Weld") and v.Name == "SeatWeld" then
-                  v:Destroy()
-               end
-            end
-
-            Humanoid:ChangeState(3)
-            Humanoid.Sit = false
-         end
-      end)
-
-      for _, track in pairs(getgenv().Humanoid:GetPlayingAnimationTracks()) do
-         if track.Name:lower():find("sit") then
-            track:Stop()
-         end
-      end
-
-      if _anti_sit_anim_conn then
-         _anti_sit_anim_conn:Disconnect()
-      end
-
-      _anti_sit_anim_conn = Humanoid.AnimationPlayed:Connect(function(track)
-         if not getgenv().ANTI_SIT_ENABLED then return end
-         if track.Name:lower():find("sit") then
-            task.defer(function()
-               track:Stop()
-            end)
-         end
-      end)
-   end
-   wait()
-   run_anti_sit()
+  if noSit then noSit:Disconnect() nositDied:Disconnect() end
+  noSit = Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):GetPropertyChangedSignal("Sit"):Connect(noSitFunc)
+  local function nositDiedFunc()
+     repeat wait() until speaker.Character ~= nil and speaker.Character:FindFirstChildOfClass("Humanoid")
+     noSit:Disconnect()
+     noSit = Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):GetPropertyChangedSignal("Sit"):Connect(noSitFunc)
+  end
+  nositDied = speaker.CharacterAdded:Connect(nositDiedFunc)
 end)
 
 addcmd("unnosit", {}, function(args, speaker)
-   getgenv().ANTI_SIT_ENABLED = false
-
-   if _anti_sit_conn then
-      _anti_sit_conn:Disconnect()
-      _anti_sit_conn = nil
-   end
-
-   if _anti_sit_anim_conn then
-      _anti_sit_anim_conn:Disconnect()
-      _anti_sit_anim_conn = nil
-   end
-
-   if Humanoid then
-      Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-   end
+  if noSit then noSit:Disconnect() nositDied:Disconnect() end
 end)
 
 addcmd("jump", {}, function(args, speaker)

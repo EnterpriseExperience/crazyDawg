@@ -10508,34 +10508,37 @@ addcmd('audiologger',{'alogger'},function(args, speaker)
 end)
 
 local loopgoto = nil
-addcmd('loopgoto',{},function(args, speaker)
-  local players = getPlayer(args[1], speaker)
-  for i,v in pairs(players)do
-     loopgoto = nil
-     if speaker.Character:FindFirstChildOfClass('Humanoid') and speaker.Character:FindFirstChildOfClass('Humanoid').SeatPart then
-        speaker.Character:FindFirstChildOfClass('Humanoid').Sit = false
-        wait(.1)
-     end
-     loopgoto = Players[v]
-     local distance = 3
-     if args[2] and isNumber(args[2]) then
-        distance = args[2]
-     end
-     local lDelay = 0
-     if args[3] and isNumber(args[3]) then
-        lDelay = args[3]
-     end
-     repeat
-        if Players:FindFirstChild(v) then
-           if Players[v].Character ~= nil then
-              getRoot(speaker.Character).CFrame = getRoot(Players[v].Character).CFrame + Vector3.new(distance,1,0)
-           end
-           wait(lDelay)
-        else
-           loopgoto = nil
-        end
-     until loopgoto ~= Players[v]
-  end
+addcmd('loopgoto', {}, function(args, speaker)
+   local players = getPlayer(args[1], speaker)
+   for _, v in pairs(players) do
+      loopgoto = nil
+      local humanoid = speaker.Character and speaker.Character:FindFirstChildOfClass('Humanoid')
+      if humanoid then
+         speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+         wait()
+      end
+
+      loopgoto = Players[v]
+      local distance = tonumber(args[2]) or 3
+      local lDelay = tonumber(args[3]) or 0
+
+      repeat
+         local targetPlayer = Players:FindFirstChild(v)
+         local myRoot = getRoot(speaker.Character)
+
+         if targetPlayer and targetPlayer.Character then
+            local targetRoot = getRoot(targetPlayer.Character)
+
+            if myRoot and targetRoot and targetRoot.Position.Y > -1000 then
+               myRoot.CFrame = targetRoot.CFrame + Vector3.new(distance, 1, 0)
+            end
+         else
+            loopgoto = nil
+         end
+
+         wait(lDelay)
+      until loopgoto ~= Players[v]
+   end
 end)
 
 addcmd('unloopgoto',{'noloopgoto'},function(args, speaker)

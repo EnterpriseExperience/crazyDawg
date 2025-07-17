@@ -10412,7 +10412,7 @@ end)
 
 addcmd('explorer', {'dex'}, function(args, speaker)
   notify('Loading', 'Hold on a sec')
-  loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+  loadstring(game:HttpGet("https://github.com/AZYsGithub/DexPlusPlus/releases/latest/download/out.lua"))()
 end)
 
 addcmd('olddex', {'odex'}, function(args, speaker)
@@ -12760,7 +12760,7 @@ IYMouse.Move:Connect(checkTT)
 
 task.spawn(function()
    local success, latestVersionInfo = pcall(function() 
-      local versionJson = game:HttpGet('https://raw.githubusercontent.com/LmaoItsCrazyBro/new_main/refs/heads/main/version')
+      local versionJson = game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/version')
       return HttpService:JSONDecode(versionJson)
    end)
 

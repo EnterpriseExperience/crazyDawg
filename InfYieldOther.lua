@@ -10435,7 +10435,7 @@ addcmd('olddex', {'odex'}, function(args, speaker)
   local function Load(Obj, Url)
      local function GiveOwnGlobals(Func, Script)
         -- Fix for this edit of dex being poorly made
-        -- I (Alex) would like to commemorate whoever added this dex in somehow finding the worst dex to ever exist
+        -- I would like to commemorate whoever added this dex in somehow finding the worst dex to ever exist
         local Fenv, RealFenv, FenvMt = {}, {
            script = Script,
            getupvalue = function(a, b)
@@ -11647,61 +11647,72 @@ addcmd('joinlogs',{'jlogs'},function(args, speaker)
 end)
 
 flinging = false
-addcmd('fling',{},function(args, speaker)
-  flinging = false
-  for _, child in pairs(speaker.Character:GetDescendants()) do
-     if child:IsA("BasePart") then
-        child.CustomPhysicalProperties = PhysicalProperties.new(math.huge, 0.3, 0.5)
-     end
-  end
-  execCmd('noclip')
-  wait(.1)
-  local bambam = Instance.new("BodyAngularVelocity")
-  bambam.Name = randomString()
-  bambam.Parent = getRoot(speaker.Character)
-  bambam.AngularVelocity = Vector3.new(0,99999,0)
-  bambam.MaxTorque = Vector3.new(0,math.huge,0)
-  bambam.P = math.huge
-  local Char = speaker.Character:GetChildren()
-  for i, v in next, Char do
-     if v:IsA("BasePart") then
-        v.CanCollide = false
-        v.Massless = true
-        v.Velocity = Vector3.new(0, 0, 0)
-     end
-  end
-  flinging = true
-  local function flingDiedF()
-     execCmd('unfling')
-  end
-  flingDied = speaker.Character:FindFirstChildOfClass('Humanoid').Died:Connect(flingDiedF)
-  repeat
-     bambam.AngularVelocity = Vector3.new(0,99999,0)
-     wait(.2)
-     bambam.AngularVelocity = Vector3.new(0,0,0)
-     wait(.1)
-  until flinging == false
+
+addcmd('fling', {}, function(args, speaker)
+   flinging = false
+   local char = speaker.Character
+   if not char then return end
+
+   for _, child in pairs(char:GetDescendants()) do
+      if child:IsA("BasePart") then
+         child.CustomPhysicalProperties = PhysicalProperties.new(100, 0.3, 0.5)
+         child.CanCollide = false
+         child.Massless = false
+         child.Velocity = Vector3.zero
+      end
+   end
+
+   execCmd('noclip')
+   task.wait(0.1)
+   local bambam = Instance.new("BodyAngularVelocity")
+   bambam.Name = randomString()
+   bambam.Parent = getRoot(char)
+   bambam.AngularVelocity = Vector3.new(0, 99999, 0)
+   bambam.MaxTorque = Vector3.new(0, math.huge, 0)
+   bambam.P = math.huge
+
+   flinging = true
+
+   local function flingDiedF()
+      execCmd('unfling')
+   end
+   flingDied = char:FindFirstChildOfClass("Humanoid").Died:Connect(flingDiedF)
+
+   task.spawn(function()
+      while flinging and bambam.Parent do
+         bambam.AngularVelocity = Vector3.new(0, 99999, 0)
+         task.wait(0.2)
+         bambam.AngularVelocity = Vector3.zero
+         task.wait(0.1)
+      end
+   end)
 end)
 
-addcmd('unfling',{'nofling'},function(args, speaker)
-  execCmd('clip')
-  if flingDied then
-     flingDied:Disconnect()
-  end
-  flinging = false
-  wait(.1)
-  local speakerChar = speaker.Character
-  if not speakerChar or not getRoot(speakerChar) then return end
-  for i,v in pairs(getRoot(speakerChar):GetChildren()) do
-     if v.ClassName == 'BodyAngularVelocity' then
-        v:Destroy()
-     end
-  end
-  for _, child in pairs(speakerChar:GetDescendants()) do
-     if child.ClassName == "Part" or child.ClassName == "MeshPart" then
-        child.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5)
-     end
-  end
+addcmd('unfling', {'nofling'}, function(args, speaker)
+   execCmd('clip')
+   if flingDied then
+      flingDied:Disconnect()
+   end
+   flinging = false
+   task.wait(0.1)
+
+   local char = speaker.Character
+   if not char or not getRoot(char) then return end
+
+   for _, v in pairs(getRoot(char):GetChildren()) do
+      if v:IsA("BodyAngularVelocity") then
+         v:Destroy()
+      end
+   end
+
+   for _, child in pairs(char:GetDescendants()) do
+      if child:IsA("BasePart") then
+         child.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5)
+         child.CanCollide = true
+         child.Massless = false
+         child.Velocity = Vector3.zero
+      end
+   end
 end)
 
 addcmd('togglefling',{},function(args, speaker)

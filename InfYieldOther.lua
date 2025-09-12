@@ -2832,10 +2832,12 @@ nosaves = false
 useFactorySettings = function()
    prefix = ';'
    StayOpen = false
+   guiScale = defaultGuiScale
    KeepInfYield = true
-   espTransparency = 0.3
+   espTransparency = 0.2
    logsEnabled = false
    jLogsEnabled = false
+   logsWebhook = nil
    aliases = {}
    binds = {}
    WayPoints = {}
@@ -3251,105 +3253,107 @@ local lastMessage = nil
 local lastLabel = nil
 local dupeCount = 1
 function CreateLabel(Name, Text)
-  if lastMessage == Name..Text then
-     dupeCount = dupeCount+1
-     lastLabel.Text = Time()..' - ['..Name..']: '..Text..' (x'..dupeCount..')'
-  else
-     if dupeCount > 1 then dupeCount = 1 end
-     if #scroll_2:GetChildren() >= 2546 then
-        scroll_2:ClearAllChildren()
-     end
-     local alls = 0
-     for i,v in pairs(scroll_2:GetChildren()) do
-        if v then
-           alls = v.Size.Y.Offset + alls
-        end
-        if not v then
-           alls = 0
-        end
-     end
-     local tl = Instance.new('TextLabel')
-     lastMessage = Name..Text
-     lastLabel = tl
-     tl.Name = Name
-     tl.Parent = scroll_2
-     tl.ZIndex = 10
-     tl.Text = Time().." - ["..Name.."]: "..Text
-     tl.Size = UDim2.new(0,322,0,84)
-     tl.BackgroundTransparency = 1
-     tl.BorderSizePixel = 0
-     tl.Font = "SourceSans"
-     tl.Position = UDim2.new(-1,0,0,alls)
-     tl.TextTransparency = 1
-     tl.TextScaled = false
-     tl.TextSize = 14
-     tl.TextWrapped = true
-     tl.TextXAlignment = "Left"
-     tl.TextYAlignment = "Top"
-     tl.TextColor3 = currentText1
-     tl.Size = UDim2.new(0,322,0,tl.TextBounds.Y)
-     table.insert(text1,tl)
-     scroll_2.CanvasSize = UDim2.new(0,0,0,alls+tl.TextBounds.Y)
-     scroll_2.CanvasPosition = Vector2.new(0,scroll_2.CanvasPosition.Y+tl.TextBounds.Y)
-     tl:TweenPosition(UDim2.new(0,3,0,alls), 'In', 'Quint', 0.5)
-     TweenService:Create(tl, TweenInfo.new(1.25, Enum.EasingStyle.Linear), { TextTransparency = 0 }):Play()
-  end
+	if lastMessage == Name..Text then
+		dupeCount = dupeCount+1
+		lastLabel.Text = Time()..' - ['..Name..']: '..Text..' (x'..dupeCount..')'
+	else
+		if dupeCount > 1 then dupeCount = 1 end
+		if #scroll_2:GetChildren() >= 2546 then
+			scroll_2:ClearAllChildren()
+		end
+		local alls = 0
+		for i,v in pairs(scroll_2:GetChildren()) do
+			if v then
+				alls = v.Size.Y.Offset + alls
+			end
+			if not v then
+				alls = 0
+			end
+		end
+		local tl = Instance.new('TextLabel')
+		lastMessage = Name..Text
+		lastLabel = tl
+		tl.Name = Name
+		tl.Parent = scroll_2
+		tl.ZIndex = 10
+		tl.RichText = true
+		tl.Text = Time().." - ["..Name.."]: "..Text
+		tl.Text = tl.ContentText
+		tl.Size = UDim2.new(0,322,0,84)
+		tl.BackgroundTransparency = 1
+		tl.BorderSizePixel = 0
+		tl.Font = "SourceSans"
+		tl.Position = UDim2.new(-1,0,0,alls)
+		tl.TextTransparency = 1
+		tl.TextScaled = false
+		tl.TextSize = 14
+		tl.TextWrapped = true
+		tl.TextXAlignment = "Left"
+		tl.TextYAlignment = "Top"
+		tl.TextColor3 = currentText1
+		tl.Size = UDim2.new(0,322,0,tl.TextBounds.Y)
+		table.insert(text1,tl)
+		scroll_2.CanvasSize = UDim2.new(0,0,0,alls+tl.TextBounds.Y)
+		scroll_2.CanvasPosition = Vector2.new(0,scroll_2.CanvasPosition.Y+tl.TextBounds.Y)
+		tl:TweenPosition(UDim2.new(0,3,0,alls), 'In', 'Quint', 0.5)
+		TweenService:Create(tl, TweenInfo.new(1.25, Enum.EasingStyle.Linear), { TextTransparency = 0 }):Play()
+	end
 end
 
 function CreateJoinLabel(plr,ID)
-  if #scroll_3:GetChildren() >= 2546 then
-     scroll_3:ClearAllChildren()
-  end
-  local infoFrame = Instance.new("Frame")
-  local info1 = Instance.new("TextLabel")
-  local info2 = Instance.new("TextLabel")
-  local ImageLabel_3 = Instance.new("ImageLabel")
-  infoFrame.Name = randomString()
-  infoFrame.Parent = scroll_3
-  infoFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-  infoFrame.BackgroundTransparency = 1
-  infoFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-  infoFrame.Size = UDim2.new(1, 0, 0, 50)
-  info1.Name = randomString()
-  info1.Parent = infoFrame
-  info1.BackgroundTransparency = 1
-  info1.BorderSizePixel = 0
-  info1.Position = UDim2.new(0, 45, 0, 0)
-  info1.Size = UDim2.new(0, 135, 1, 0)
-  info1.ZIndex = 10
-  info1.Font = Enum.Font.SourceSans
-  info1.FontSize = Enum.FontSize.Size14
-  info1.Text = "Username: "..plr.Name.."\nJoined Server: "..Time()
-  info1.TextColor3 = Color3.new(1, 1, 1)
-  info1.TextWrapped = true
-  info1.TextXAlignment = Enum.TextXAlignment.Left
-  info2.Name = randomString()
-  info2.Parent = infoFrame
-  info2.BackgroundTransparency = 1
-  info2.BorderSizePixel = 0
-  info2.Position = UDim2.new(0, 185, 0, 0)
-  info2.Size = UDim2.new(0, 140, 1, -5)
-  info2.ZIndex = 10
-  info2.Font = Enum.Font.SourceSans
-  info2.FontSize = Enum.FontSize.Size14
-  info2.Text = "User ID: "..ID.."\nAccount Age: "..plr.AccountAge.."\nJoined Roblox: Loading..."
-  info2.TextColor3 = Color3.new(1, 1, 1)
-  info2.TextWrapped = true
-  info2.TextXAlignment = Enum.TextXAlignment.Left
-  info2.TextYAlignment = Enum.TextYAlignment.Center
-  ImageLabel_3.Parent = infoFrame
-  ImageLabel_3.BackgroundTransparency = 1
-  ImageLabel_3.BorderSizePixel = 0
-  ImageLabel_3.Size = UDim2.new(0, 45, 1, 0)
-  ImageLabel_3.Image = Players:GetUserThumbnailAsync(ID, Enum.ThumbnailType.AvatarThumbnail, Enum.ThumbnailSize.Size420x420)
-  scroll_3.CanvasSize = UDim2.new(0, 0, 0, listlayout.AbsoluteContentSize.Y)
-  scroll_3.CanvasPosition = Vector2.new(0,scroll_2.CanvasPosition.Y+infoFrame.AbsoluteSize.Y)
-  wait()
-  local user = game:HttpGet("https://users.roblox.com/v1/users/"..ID)
-  local json = HttpService:JSONDecode(user)
-  local date = json["created"]:sub(1,10)
-  local splitDates = string.split(date,"-")
-  info2.Text = string.gsub(info2.Text, "Loading...",splitDates[2].."/"..splitDates[3].."/"..splitDates[1])
+	if #scroll_3:GetChildren() >= 2546 then
+		scroll_3:ClearAllChildren()
+	end
+	local infoFrame = Instance.new("Frame")
+	local info1 = Instance.new("TextLabel")
+	local info2 = Instance.new("TextLabel")
+	local ImageLabel_3 = Instance.new("ImageLabel")
+	infoFrame.Name = randomString()
+	infoFrame.Parent = scroll_3
+	infoFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+	infoFrame.BackgroundTransparency = 1
+	infoFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+	infoFrame.Size = UDim2.new(1, 0, 0, 50)
+	info1.Name = randomString()
+	info1.Parent = infoFrame
+	info1.BackgroundTransparency = 1
+	info1.BorderSizePixel = 0
+	info1.Position = UDim2.new(0, 45, 0, 0)
+	info1.Size = UDim2.new(0, 135, 1, 0)
+	info1.ZIndex = 10
+	info1.Font = Enum.Font.SourceSans
+	info1.FontSize = Enum.FontSize.Size14
+	info1.Text = "Username: "..plr.Name.."\nJoined Server: "..Time()
+	info1.TextColor3 = Color3.new(1, 1, 1)
+	info1.TextWrapped = true
+	info1.TextXAlignment = Enum.TextXAlignment.Left
+	info2.Name = randomString()
+	info2.Parent = infoFrame
+	info2.BackgroundTransparency = 1
+	info2.BorderSizePixel = 0
+	info2.Position = UDim2.new(0, 185, 0, 0)
+	info2.Size = UDim2.new(0, 140, 1, -5)
+	info2.ZIndex = 10
+	info2.Font = Enum.Font.SourceSans
+	info2.FontSize = Enum.FontSize.Size14
+	info2.Text = "User ID: "..ID.."\nAccount Age: "..plr.AccountAge.."\nJoined Roblox: Loading..."
+	info2.TextColor3 = Color3.new(1, 1, 1)
+	info2.TextWrapped = true
+	info2.TextXAlignment = Enum.TextXAlignment.Left
+	info2.TextYAlignment = Enum.TextYAlignment.Center
+	ImageLabel_3.Parent = infoFrame
+	ImageLabel_3.BackgroundTransparency = 1
+	ImageLabel_3.BorderSizePixel = 0
+	ImageLabel_3.Size = UDim2.new(0, 45, 1, 0)
+	ImageLabel_3.Image = Players:GetUserThumbnailAsync(ID, Enum.ThumbnailType.AvatarThumbnail, Enum.ThumbnailSize.Size420x420)
+	scroll_3.CanvasSize = UDim2.new(0, 0, 0, listlayout.AbsoluteContentSize.Y)
+	scroll_3.CanvasPosition = Vector2.new(0,scroll_2.CanvasPosition.Y+infoFrame.AbsoluteSize.Y)
+	wait()
+	local user = game:HttpGet("https://users.roblox.com/v1/users/"..ID)
+	local json = HttpService:JSONDecode(user)
+	local date = json["created"]:sub(1,10)
+	local splitDates = string.split(date,"-")
+	info2.Text = string.gsub(info2.Text, "Loading...",splitDates[2].."/"..splitDates[3].."/"..splitDates[1])
 end
 
 IYMouse.KeyDown:Connect(function(Key)
@@ -3947,18 +3951,47 @@ if not writefileExploit() then
    notify("Saves", "Your exploit does not support read/write file. Your settings will not save.")
 end
 
-ChatLog = function(plr)
-  plr.Chatted:Connect(function(Message)
-     if logsEnabled == true then
-        CreateLabel(plr.Name,Message)
-     end
-  end)
+avatarcache = {}
+function sendChatWebhook(player, message)
+   if httprequest and vtype(logsWebhook, "string") then
+      local id = player.UserId
+      local avatar = avatarcache[id]
+      if not avatar then
+         local d = HttpService:JSONDecode(httprequest({
+         Url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. id .. "&size=420x420&format=Png&isCircular=false",
+         Method = "GET"
+         }).Body)["data"]
+         avatar = d and d[1].state == "Completed" and d[1].imageUrl or "https://files.catbox.moe/i968v2.jpg"
+         avatarcache[id] = avatar
+      end
+      local log = HttpService:JSONEncode({
+         content = message,
+         avatar_url = avatar,
+         username = formatUsername(player),
+         allowed_mentions = {parse = {}}
+      })
+      httprequest({
+         Url = logsWebhook,
+         Method = "POST",
+         Headers = {["Content-Type"] = "application/json"},
+         Body = log
+      })
+   end
+end
+
+ChatLog = function(player)
+   player.Chatted:Connect(function(message)
+      if logsEnabled == true then
+         CreateLabel(player.Name, message)
+         sendChatWebhook(player, message)
+      end
+   end)
 end
 
 JoinLog = function(plr)
-  if jLogsEnabled == true then
-     CreateJoinLabel(plr,plr.UserId)
-  end
+	if jLogsEnabled == true then
+		CreateJoinLabel(plr,plr.UserId)
+	end
 end
 
 CleanFileName = function(name)
@@ -11601,21 +11634,21 @@ addcmd('grippos',{},function(args, speaker)
 end)
 
 addcmd('usetools', {}, function(args, speaker)
-  local Backpack = speaker:FindFirstChildOfClass("Backpack")
-  local ammount = tonumber(args[1]) or 1
-  local delay_ = tonumber(args[2]) or false
-  for _, v in ipairs(Backpack:GetChildren()) do
-     v.Parent = speaker.Character
-     task.spawn(function()
-        for _ = 1, ammount do
-           v:Activate()
-           if delay_ then
-              wait(delay_)
-           end
-        end
-        v.Parent = Backpack
-     end)
-  end
+   local Backpack = speaker:FindFirstChildOfClass("Backpack")
+   local ammount = tonumber(args[1]) or 1
+   local delay_ = tonumber(args[2]) or false
+   for _, v in ipairs(Backpack:GetChildren()) do
+      v.Parent = speaker.Character
+      task.spawn(function()
+         for _ = 1, ammount do
+            v:Activate()
+            if delay_ then
+               wait(delay_)
+            end
+         end
+         v.Parent = Backpack
+      end)
+   end
 end)
 
 addcmd('logs',{},function(args, speaker)
@@ -11623,15 +11656,15 @@ addcmd('logs',{},function(args, speaker)
 end)
 
 addcmd('chatlogs',{'clogs'},function(args, speaker)
-  join.Visible = false
-  chat.Visible = true
-  table.remove(shade3,table.find(shade3,selectChat))
-  table.remove(shade2,table.find(shade2,selectJoin))
-  table.insert(shade2,selectChat)
-  table.insert(shade3,selectJoin)
-  selectJoin.BackgroundColor3 = currentShade3
-  selectChat.BackgroundColor3 = currentShade2
-  logs:TweenPosition(UDim2.new(0, 0, 1, -265), "InOut", "Quart", 0.3, true, nil)
+	join.Visible = false
+	chat.Visible = true
+	table.remove(shade3,table.find(shade3,selectChat))
+	table.remove(shade2,table.find(shade2,selectJoin))
+	table.insert(shade2,selectChat)
+	table.insert(shade3,selectJoin)
+	selectJoin.BackgroundColor3 = currentShade3
+	selectChat.BackgroundColor3 = currentShade2
+	logs:TweenPosition(UDim2.new(0, 0, 1, -265), "InOut", "Quart", 0.3, true, nil)
 end)
 
 addcmd('joinlogs',{'jlogs'},function(args, speaker)
@@ -11644,6 +11677,35 @@ addcmd('joinlogs',{'jlogs'},function(args, speaker)
   selectChat.BackgroundColor3 = currentShade3
   selectJoin.BackgroundColor3 = currentShade2
   logs:TweenPosition(UDim2.new(0, 0, 1, -265), "InOut", "Quart", 0.3, true, nil)
+end)
+
+addcmd("chatlogswebhook", {"logswebhook"}, function(args, speaker)
+   if httprequest then
+      logsWebhook = args[1] or nil
+      updatesaves()
+   else
+      notify("Incompatible Exploit", "Your exploit does not support this command (missing request)")
+   end
+end)
+
+addcmd("antichatlogs", {"antichatlogger"}, function(args, speaker)
+   if not isLegacyChat then
+      return notify("antichatlogs", "Game needs the legacy chat")
+   end
+   local MessagePosted, _ = pcall(function()
+      rawset(require(speaker:FindFirstChild("PlayerScripts"):FindFirstChild("ChatScript").ChatMain), "MessagePosted", {
+         ["fire"] = function(msg)
+            return msg
+         end,
+         ["wait"] = function()
+            return
+         end,
+         ["connect"] = function()
+            return
+         end
+      })
+   end)
+   notify("antichatlogs", MessagePosted and "Enabled" or "Failed to enable antichatlogs")
 end)
 
 flinging = false
@@ -12712,6 +12774,24 @@ function hookCharEvents(plr,instant)
         end
      end)
   end)
+end
+
+if not isLegacyChat then
+   TextChatService.MessageReceived:Connect(function(message)
+      if message.TextSource then
+         local player = Players:GetPlayerByUserId(message.TextSource.UserId)
+         if not player then return end
+
+         if logsEnabled == true then
+            CreateLabel(player.Name, message.Text)
+         end
+         if player.UserId == Players.LocalPlayer.UserId then
+            do_exec(message.Text, Players.LocalPlayer)
+         end
+         eventEditor.FireEvent("OnChatted", player.Name, message.Text)
+         sendChatWebhook(player, message.Text)
+      end
+   end)
 end
 
 Players.PlayerAdded:Connect(function(plr)

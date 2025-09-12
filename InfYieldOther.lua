@@ -1971,6 +1971,12 @@ function isNumber(str)
   end
 end
 
+function vtype(o, t)
+   if o == nil then return false end
+   if type(o) == "userdata" then return typeof(o) == t end
+   return type(o) == t
+end
+
 function getRoot(char)
   local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
   return rootPart

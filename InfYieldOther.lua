@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.5.2"
+currentVersion = "7.5.3"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -11919,12 +11919,43 @@ function findplr(args)
    end
 end
 
-addcmd('loopfling', {}, function(target, speaker)
-   local TargetPlr = findplr(target)
-   if not TargetPlr then return end
-   local TargetChar = TargetPlr.Character or TargetPlr.CharacterAdded:Wait()
+viewing = nil
+addcmd('view',{'spectate'},function(args, speaker)
+   StopFreecam()
+   local players = getPlayer(args[1], speaker)
+   for i,v in pairs(players) do
+      if viewDied then
+         viewDied:Disconnect()
+         viewChanged:Disconnect()
+      end
+      viewing = Players[v]
+      workspace.CurrentCamera.CameraSubject = viewing.Character
+      notify('Spectate','Viewing ' .. Players[v].Name)
+      local function viewDiedFunc()
+         repeat wait() until Players[v].Character ~= nil and getRoot(Players[v].Character)
+         workspace.CurrentCamera.CameraSubject = viewing.Character
+      end
+      viewDied = Players[v].CharacterAdded:Connect(viewDiedFunc)
+      local function viewChangedFunc()
+         workspace.CurrentCamera.CameraSubject = viewing.Character
+      end
+      viewChanged = workspace.CurrentCamera:GetPropertyChangedSignal("CameraSubject"):Connect(viewChangedFunc)
+   end
+end)
 
-   if TargetChar then
+addcmd('loopfling',{},function(args, speaker)
+   local players = getPlayer(args[1], speaker)
+
+   execCmd('unvfly')
+   execCmd('unfling')
+   execCmd('unloopgoto')
+   execCmd('unantivoid')
+   task.wait(0.1)
+   for i,v in pairs(players) do
+      local players = getPlayer(args[1], speaker)
+      local TargetPlayer = Players[v]
+      local TargetChar = TargetPlayer.Character or TargetPlayer.CharacterAdded:Wait()
+      
       execCmd('vfly 7')
       execCmd('fling')
       execCmd('loopgoto '..tostring(TargetPlr)..' 0 0')
@@ -11968,50 +11999,50 @@ end)
 
 walkflinging = false
 addcmd("walkfling", {}, function(args, speaker)
-    execCmd("unwalkfling")
-    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-    if humanoid then
-        humanoid.Died:Connect(function()
-            execCmd("unwalkfling")
-        end)
-    end
+   execCmd("unwalkfling")
+   local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+   if humanoid then
+      humanoid.Died:Connect(function()
+         execCmd("unwalkfling")
+      end)
+   end
 
-    execCmd("noclip nonotify")
-    walkflinging = true
-    repeat RunService.Heartbeat:Wait()
-        local character = speaker.Character
-        local root = getRoot(character)
-        local vel, movel = nil, 0.1
+   execCmd("noclip nonotify")
+   walkflinging = true
+   repeat RunService.Heartbeat:Wait()
+      local character = speaker.Character
+      local root = getRoot(character)
+      local vel, movel = nil, 0.1
 
-        while not (character and character.Parent and root and root.Parent) do
-            RunService.Heartbeat:Wait()
-            character = speaker.Character
-            root = getRoot(character)
-        end
+      while not (character and character.Parent and root and root.Parent) do
+         RunService.Heartbeat:Wait()
+         character = speaker.Character
+         root = getRoot(character)
+      end
 
-        vel = root.Velocity
-        root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+      vel = root.Velocity
+      root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
 
-        RunService.RenderStepped:Wait()
-        if character and character.Parent and root and root.Parent then
-            root.Velocity = vel
-        end
+      RunService.RenderStepped:Wait()
+      if character and character.Parent and root and root.Parent then
+         root.Velocity = vel
+      end
 
-        RunService.Stepped:Wait()
-        if character and character.Parent and root and root.Parent then
-            root.Velocity = vel + Vector3.new(0, movel, 0)
-            movel = movel * -1
-        end
-    until walkflinging == false
+      RunService.Stepped:Wait()
+      if character and character.Parent and root and root.Parent then
+         root.Velocity = vel + Vector3.new(0, movel, 0)
+         movel = movel * -1
+      end
+   until walkflinging == false
 end)
 
 addcmd("unwalkfling", {"nowalkfling"}, function(args, speaker)
-    walkflinging = false
-    execCmd("unnoclip nonotify")
+   walkflinging = false
+   execCmd("unnoclip nonotify")
 end)
 
 addcmd("togglewalkfling", {}, function(args, speaker)
-    execCmd(walkflinging and "unwalkfling" or "walkfling")
+   execCmd(walkflinging and "unwalkfling" or "walkfling")
 end)
 
 addcmd('invisfling',{},function(args, speaker)

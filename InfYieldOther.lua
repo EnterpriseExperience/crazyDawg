@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.4.7"
+currentVersion = "7.4.9"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -9437,9 +9437,6 @@ addcmd('unfreezeanims',{},function(args, speaker)
   end
 end)
 
-
-
-
 addcmd('respawn',{},function(args, speaker)
   respawn(speaker)
 end)
@@ -11181,43 +11178,43 @@ addcmd('unhatspin',{'unspinhats'},function(args, speaker)
 end)
 
 addcmd('clearhats',{'cleanhats'},function(args, speaker)
-  if firetouchinterest then
-     local Player = Players.LocalPlayer
-     local Character = Player.Character
-     local Old = Character:FindFirstChild("HumanoidRootPart").CFrame
-     local Hats = {}
+   if firetouchinterest then
+      local Player = Players.LocalPlayer
+      local Character = Player.Character
+      local Old = Character:FindFirstChild("HumanoidRootPart").CFrame
+      local Hats = {}
 
-     for _, child in ipairs(workspace:GetChildren()) do
-        if child:IsA("Accessory") then
-           table.insert(Hats, child)
-        end
-     end
+      for _, child in ipairs(workspace:GetChildren()) do
+         if child:IsA("Accessory") then
+            table.insert(Hats, child)
+         end
+      end
 
-     for _, accessory in ipairs(Character:FindFirstChildOfClass("Humanoid"):GetAccessories()) do
-        accessory:Destroy()
-     end
+      for _, accessory in ipairs(Character:FindFirstChildOfClass("Humanoid"):GetAccessories()) do
+         accessory:Destroy()
+      end
 
-     for i = 1, #Hats do
-        repeat RunService.Heartbeat:wait() until Hats[i]
-        firetouchinterest(Hats[i].Handle,Character:FindFirstChild("HumanoidRootPart"),0)
-        repeat RunService.Heartbeat:wait() until Character:FindFirstChildOfClass("Accessory")
-        Character:FindFirstChildOfClass("Accessory"):Destroy()
-        repeat RunService.Heartbeat:wait() until not Character:FindFirstChildOfClass("Accessory")
-     end
+      for i = 1, #Hats do
+         repeat RunService.Heartbeat:wait() until Hats[i]
+         firetouchinterest(Hats[i].Handle,Character:FindFirstChild("HumanoidRootPart"),0)
+         repeat RunService.Heartbeat:wait() until Character:FindFirstChildOfClass("Accessory")
+         Character:FindFirstChildOfClass("Accessory"):Destroy()
+         repeat RunService.Heartbeat:wait() until not Character:FindFirstChildOfClass("Accessory")
+      end
 
-     execCmd("reset")
+      execCmd("reset")
 
-     Player.CharacterAdded:Wait()
+      Player.CharacterAdded:Wait()
 
-     for i = 1,20 do 
-        RunService.Heartbeat:Wait()
-        if Player.Character:FindFirstChild("HumanoidRootPart") then
-           Player.Character:FindFirstChild("HumanoidRootPart").CFrame = Old
-        end
-     end
-  else
-     notify("Incompatible Exploit","Your exploit does not support this command (missing firetouchinterest)")
-  end
+      for i = 1,20 do 
+         RunService.Heartbeat:Wait()
+         if Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character:FindFirstChild("HumanoidRootPart").CFrame = Old
+         end
+      end
+   else
+      notify("Incompatible Exploit","Your exploit does not support this command (missing firetouchinterest)")
+   end
 end)
 
 addcmd('vr',{},function(args, speaker)
@@ -11783,12 +11780,167 @@ addcmd('unfling', {'nofling'}, function(args, speaker)
    end
 end)
 
+local cmdp = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
+local cmdlp = cmdp.LocalPlayer
+
+function findplr(args)
+   local tbl = cmdp:GetPlayers()
+
+   if args == "me" or args == cmdlp.Name or args == cmdlp.DisplayName then
+      return warn("Failure!", "You cannot target yourself!")
+   end
+
+   if args == "random" then
+      local validPlayers = {}
+      for _, v in pairs(tbl) do
+         if v ~= cmdlp then
+            table.insert(validPlayers, v)
+         end
+      end
+      return #validPlayers > 0 and validPlayers[math.random(1, #validPlayers)] or nil
+   end
+
+   if args == "new" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v.AccountAge < 30 and v ~= cmdlp then
+            table.insert(vAges, v)
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "old" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v.AccountAge > 30 and v ~= cmdlp then
+            table.insert(vAges, v)
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "bacon" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v ~= cmdlp and (v.Character:FindFirstChild("Pal Hair") or v.Character:FindFirstChild("Kate Hair")) then
+            table.insert(vAges, v)
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "friend" then
+      local friendList = {}
+      for _, v in pairs(tbl) do
+         if v:IsFriendsWith(cmdlp.UserId) and v ~= cmdlp then
+            table.insert(friendList, v)
+         end
+      end
+      return #friendList > 0 and friendList[math.random(1, #friendList)] or nil
+   end
+
+   if args == "notfriend" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if not v:IsFriendsWith(cmdlp.UserId) and v ~= cmdlp then
+            table.insert(vAges, v)
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "ally" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v.Team == cmdlp.Team and v ~= cmdlp then
+            table.insert(vAges, v)
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "enemy" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v.Team ~= cmdlp.Team and v ~= cmdlp then
+            table.insert(vAges, v)
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "near" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v ~= cmdlp and v.Character and cmdlp.Character then
+            local vRootPart = v.Character:FindFirstChild("HumanoidRootPart")
+            local cmdlpRootPart = cmdlp.Character:FindFirstChild("HumanoidRootPart")
+            if vRootPart and cmdlpRootPart then
+               local distance = (vRootPart.Position - cmdlpRootPart.Position).magnitude
+               if distance < 30 then
+                  table.insert(vAges, v)
+               end
+            end
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   if args == "far" then
+      local vAges = {}
+      for _, v in pairs(tbl) do
+         if v ~= cmdlp and v.Character and cmdlp.Character then
+            local vRootPart = v.Character:FindFirstChild("HumanoidRootPart")
+            local cmdlpRootPart = cmdlp.Character:FindFirstChild("HumanoidRootPart")
+            if vRootPart and cmdlpRootPart then
+               local distance = (vRootPart.Position - cmdlpRootPart.Position).magnitude
+               if distance > 30 then
+                  table.insert(vAges, v)
+               end
+            end
+         end
+      end
+      return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+   end
+
+   for _, v in pairs(tbl) do
+      if (v.Name:lower():find(args:lower()) or v.DisplayName:lower():find(args:lower())) and v ~= cmdlp then
+         return v
+      end
+   end
+end
+
+addcmd('loopfling', {}, function(target, speaker)
+   local TargetPlr = findplr(target)
+   if not TargetPlr then return end
+   local TargetChar = TargetPlr.Character or TargetPlr.CharacterAdded:Wait()
+
+   if TargetChar then
+      execCmd('vfly 7')
+      execCmd('fling')
+      execCmd('loopgoto '..tostring(TargetPlr)..' 0 0')
+      execCmd('view '..tostring(TargetPlr))
+      execCmd('antivoid')
+   end
+end)
+
+addcmd('loopfling', {}, function(speaker)
+   execCmd('unvfly')
+   execCmd('unfling')
+   execCmd('unloopgoto')
+   execCmd('unloopgoto')
+   execCmd('unview')
+   execCmd('unantivoid')
+   execCmd('reset')
+end)
+
 addcmd('togglefling',{},function(args, speaker)
-  if flinging then
-     execCmd('unfling')
-  else
-     execCmd('fling')
-  end
+   if flinging then
+      execCmd('unfling')
+   else
+      execCmd('fling')
+   end
 end)
 
 addcmd("flyfling", {}, function(args, speaker)
@@ -12724,62 +12876,61 @@ updateColors(currentText2,text2)
 updateColors(currentScroll,scroll)
 
 if PluginsTable ~= nil or PluginsTable ~= {} then
-  FindPlugins(PluginsTable)
+   FindPlugins(PluginsTable)
 end
 
--- Events
 eventEditor.RegisterEvent("OnExecute")
 eventEditor.RegisterEvent("OnSpawn",{
-  {Type="Player",Name="Player Filter ($1)"}
+   {Type="Player",Name="Player Filter ($1)"}
 })
-eventEditor.RegisterEvent("OnDied",{
-  {Type="Player",Name="Player Filter ($1)"}
+   eventEditor.RegisterEvent("OnDied",{
+   {Type="Player",Name="Player Filter ($1)"}
 })
-eventEditor.RegisterEvent("OnDamage",{
-  {Type="Player",Name="Player Filter ($1)"},
-  {Type="Number",Name="Below Health ($2)"}
+   eventEditor.RegisterEvent("OnDamage",{
+   {Type="Player",Name="Player Filter ($1)"},
+   {Type="Number",Name="Below Health ($2)"}
 })
-eventEditor.RegisterEvent("OnKilled",{
-  {Type="Player",Name="Victim Player ($1)"},
-  {Type="Player",Name="Killer Player ($2)",Default = 1}
+   eventEditor.RegisterEvent("OnKilled",{
+   {Type="Player",Name="Victim Player ($1)"},
+   {Type="Player",Name="Killer Player ($2)",Default = 1}
 })
-eventEditor.RegisterEvent("OnJoin",{
-  {Type="Player",Name="Player Filter ($1)",Default = 1}
+   eventEditor.RegisterEvent("OnJoin",{
+   {Type="Player",Name="Player Filter ($1)",Default = 1}
 })
-eventEditor.RegisterEvent("OnLeave",{
-  {Type="Player",Name="Player Filter ($1)",Default = 1}
+   eventEditor.RegisterEvent("OnLeave",{
+   {Type="Player",Name="Player Filter ($1)",Default = 1}
 })
-eventEditor.RegisterEvent("OnChatted",{
-  {Type="Player",Name="Player Filter ($1)",Default = 1},
-  {Type="String",Name="Message Filter ($2)"}
+   eventEditor.RegisterEvent("OnChatted",{
+   {Type="Player",Name="Player Filter ($1)",Default = 1},
+   {Type="String",Name="Message Filter ($2)"}
 })
 
 function hookCharEvents(plr,instant)
-  task.spawn(function()
-     local char = plr.Character
-     if not char then return end
+   task.spawn(function()
+      local char = plr.Character
+      if not char then return end
 
-     local humanoid = char:WaitForChild("Humanoid",10)
-     if not humanoid then return end
+      local humanoid = char:WaitForChild("Humanoid",10)
+      if not humanoid then return end
 
-     local oldHealth = humanoid.Health
-     humanoid.HealthChanged:Connect(function(health)
-        local change = math.abs(oldHealth - health)
-        if oldHealth > health then
-           eventEditor.FireEvent("OnDamage",plr.Name,tonumber(health))
-        end
-        oldHealth = health
-     end)
+      local oldHealth = humanoid.Health
+      humanoid.HealthChanged:Connect(function(health)
+         local change = math.abs(oldHealth - health)
+         if oldHealth > health then
+            eventEditor.FireEvent("OnDamage",plr.Name,tonumber(health))
+         end
+         oldHealth = health
+      end)
 
-     humanoid.Died:Connect(function()
-        eventEditor.FireEvent("OnDied",plr.Name)
+      humanoid.Died:Connect(function()
+         eventEditor.FireEvent("OnDied",plr.Name)
 
-        local killedBy = humanoid:FindFirstChild("creator")
-        if killedBy and killedBy.Value and killedBy.Value.Parent then
-           eventEditor.FireEvent("OnKilled",plr.Name,killedBy.Name)
-        end
-     end)
-  end)
+         local killedBy = humanoid:FindFirstChild("creator")
+         if killedBy and killedBy.Value and killedBy.Value.Parent then
+            eventEditor.FireEvent("OnKilled",plr.Name,killedBy.Name)
+         end
+      end)
+   end)
 end
 
 if not isLegacyChat then
@@ -12801,26 +12952,26 @@ if not isLegacyChat then
 end
 
 Players.PlayerAdded:Connect(function(plr)
-  eventEditor.FireEvent("OnJoin",plr.Name)
-  plr.Chatted:Connect(function(msg) eventEditor.FireEvent("OnChatted",tostring(plr),msg) end)
-  plr.CharacterAdded:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
-  JoinLog(plr)
-  ChatLog(plr)
-  if ESPenabled then
-     repeat wait(1) until plr.Character and getRoot(plr.Character)
-     ESP(plr)
-  end
-  if CHMSenabled then
-     repeat wait(1) until plr.Character and getRoot(plr.Character)
-     CHMS(plr)
-  end
+   eventEditor.FireEvent("OnJoin",plr.Name)
+   plr.Chatted:Connect(function(msg) eventEditor.FireEvent("OnChatted",tostring(plr),msg) end)
+   plr.CharacterAdded:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
+   JoinLog(plr)
+   ChatLog(plr)
+   if ESPenabled then
+      repeat wait(1) until plr.Character and getRoot(plr.Character)
+      ESP(plr)
+   end
+   if CHMSenabled then
+      repeat wait(1) until plr.Character and getRoot(plr.Character)
+      CHMS(plr)
+   end
 end)
 
 for _,plr in pairs(Players:GetPlayers()) do
-  pcall(function()
-     plr.CharacterAdded:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
-     hookCharEvents(plr)
-  end)
+   pcall(function()
+      plr.CharacterAdded:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
+      hookCharEvents(plr)
+   end)
 end
 
 if spawnCmds and #spawnCmds > 0 then
@@ -12836,21 +12987,21 @@ eventEditor.Refresh()
 eventEditor.FireEvent("OnExecute")
 
 if aliases and #aliases > 0 then
-  local cmdMap = {}
-  for i,v in pairs(cmds) do
-     cmdMap[v.NAME:lower()] = v
-     for _,alias in pairs(v.ALIAS) do
-        cmdMap[alias:lower()] = v
-     end
-  end
-  for i = 1, #aliases do
-     local cmd = string.lower(aliases[i].CMD)
-     local alias = string.lower(aliases[i].ALIAS)
-     if cmdMap[cmd] then
-        customAlias[alias] = cmdMap[cmd]
-     end
-  end
-  refreshaliases()
+   local cmdMap = {}
+   for i,v in pairs(cmds) do
+      cmdMap[v.NAME:lower()] = v
+      for _,alias in pairs(v.ALIAS) do
+         cmdMap[alias:lower()] = v
+      end
+   end
+   for i = 1, #aliases do
+      local cmd = string.lower(aliases[i].CMD)
+      local alias = string.lower(aliases[i].ALIAS)
+      if cmdMap[cmd] then
+         customAlias[alias] = cmdMap[cmd]
+      end
+   end
+   refreshaliases()
 end
 
 IYMouse.Move:Connect(checkTT)

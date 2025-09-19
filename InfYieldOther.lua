@@ -11919,30 +11919,6 @@ function findplr(args)
    end
 end
 
-viewing = nil
-addcmd('view',{'spectate'},function(args, speaker)
-   StopFreecam()
-   local players = getPlayer(args[1], speaker)
-   for i,v in pairs(players) do
-      if viewDied then
-         viewDied:Disconnect()
-         viewChanged:Disconnect()
-      end
-      viewing = Players[v]
-      workspace.CurrentCamera.CameraSubject = viewing.Character
-      notify('Spectate','Viewing ' .. Players[v].Name)
-      local function viewDiedFunc()
-         repeat wait() until Players[v].Character ~= nil and getRoot(Players[v].Character)
-         workspace.CurrentCamera.CameraSubject = viewing.Character
-      end
-      viewDied = Players[v].CharacterAdded:Connect(viewDiedFunc)
-      local function viewChangedFunc()
-         workspace.CurrentCamera.CameraSubject = viewing.Character
-      end
-      viewChanged = workspace.CurrentCamera:GetPropertyChangedSignal("CameraSubject"):Connect(viewChangedFunc)
-   end
-end)
-
 addcmd('loopfling',{},function(args, speaker)
    local players = getPlayer(args[1], speaker)
 
@@ -11958,8 +11934,8 @@ addcmd('loopfling',{},function(args, speaker)
       
       execCmd('vfly 7')
       execCmd('fling')
-      execCmd('loopgoto '..tostring(TargetPlr)..' 0 0')
-      execCmd('view '..tostring(TargetPlr))
+      execCmd('loopgoto '..TargetPlr.Name..' 0 0')
+      execCmd('view '..TargetPlr.Name)
       execCmd('antivoid')
    end
 end)

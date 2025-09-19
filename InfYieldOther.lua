@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.5.3"
+currentVersion = "7.5.5"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -10547,8 +10547,8 @@ addcmd('remotespy',{'rspy'},function(args, speaker)
 end)
 
 addcmd('audiologger',{'alogger'},function(args, speaker)
-  notify("Loading",'Hold on a sec')
-  loadstring(game:HttpGet(('https://raw.githubusercontent.com/infyiff/backup/main/audiologger.lua'),true))()
+   notify("Loading",'Hold on a sec')
+   loadstring(game:HttpGet(('https://raw.githubusercontent.com/infyiff/backup/main/audiologger.lua'),true))()
 end)
 
 local loopgoto = nil
@@ -10586,7 +10586,7 @@ addcmd('loopgoto', {}, function(args, speaker)
 end)
 
 addcmd('unloopgoto',{'noloopgoto'},function(args, speaker)
-  loopgoto = nil
+   loopgoto = nil
 end)
 
 addcmd('headsit',{},function(args, speaker)
@@ -11922,21 +11922,21 @@ end
 addcmd('loopfling',{},function(args, speaker)
    local players = getPlayer(args[1], speaker)
 
-   execCmd('unvfly')
-   execCmd('unfling')
-   execCmd('unloopgoto')
-   execCmd('unantivoid')
+   getgenv().execCmd('unvfly')
+   getgenv().execCmd('unfling')
+   getgenv().execCmd('unloopgoto')
+   getgenv().execCmd('unantivoid')
    task.wait(0.1)
+
    for i,v in pairs(players) do
-      local players = getPlayer(args[1], speaker)
       local TargetPlayer = Players[v]
       local TargetChar = TargetPlayer.Character or TargetPlayer.CharacterAdded:Wait()
-      
-      execCmd('vfly 7')
-      execCmd('fling')
-      execCmd('loopgoto '..TargetPlr.Name..' 0 0')
-      execCmd('view '..TargetPlr.Name)
-      execCmd('antivoid')
+
+      getgenv().execCmd('vfly 7')
+      getgenv().execCmd('fling')
+      getgenv().execCmd('loopgoto '..TargetPlayer.Name..' 0 0')
+      getgenv().execCmd('view '..TargetPlayer.Name)
+      getgenv().execCmd('antivoid')
    end
 end)
 

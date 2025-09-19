@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.4.9"
+currentVersion = "7.5.2"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -4693,7 +4693,13 @@ CMDs[#CMDs + 1] = {NAME = 'fling', DESC = 'Flings anyone you touch'}
 CMDs[#CMDs + 1] = {NAME = 'unfling', DESC = 'Disables the fling command'}
 CMDs[#CMDs + 1] = {NAME = 'flyfling', DESC = 'Basically the invisfling command but not invisible'}
 CMDs[#CMDs + 1] = {NAME = 'unflyfling', DESC = 'Disables the flyfling command'}
+CMDs[#CMDs + 1] = {NAME = 'walkfling', DESC = 'Basically fling but no spinning'}
+CMDs[#CMDs + 1] = {NAME = 'unwalkfling / nowalkfling', DESC = 'Disables walkfling'}
+CMDs[#CMDs + 1] = {NAME = 'loopfling [player]', DESC = 'Loop flings a player and auto locks onto them.'}
+CMDs[#CMDs + 1] = {NAME = 'unloopfling', DESC = 'Disables the auto locking loopfling.'}
 CMDs[#CMDs + 1] = {NAME = 'invisfling', DESC = 'Enables invisible fling'}
+CMDs[#CMDs + 1] = {NAME = 'antifling', DESC = 'Disables player collisions to prevent you from being flung'}
+CMDs[#CMDs + 1] = {NAME = 'unantifling', DESC = 'Disables antifling'}
 CMDs[#CMDs + 1] = {NAME = 'loopoof', DESC = 'Loops everyones character sounds (everyone can hear)'}
 CMDs[#CMDs + 1] = {NAME = 'unloopoof', DESC = 'Stops the oof chaos'}
 CMDs[#CMDs + 1] = {NAME = 'muteboombox [player]', DESC = 'Mutes someones boombox'}
@@ -6946,34 +6952,30 @@ addcmd("rejoin", {"rj"}, function(args, speaker)
 end)
 
 addcmd("autorejoin", {"autorj"}, function(args, speaker)
-  GuiService.ErrorMessageChanged:Connect(function()
-     execCmd("rejoin")
-  end)
-  notify("Auto Rejoin", "Auto rejoin enabled")
+   GuiService.ErrorMessageChanged:Connect(function()
+      execCmd("rejoin")
+   end)
+   notify("Auto Rejoin", "Auto rejoin enabled")
 end)
 
 addcmd("serverhop", {"shop"}, function(args, speaker)
-   -- thanks to NoobSploit for fixing
-   if httprequest then
-       local servers = {}
-       local req = httprequest({Url = string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true", PlaceId)})
-       local body = HttpService:JSONDecode(req.Body)
+   -- thanks to Amity for fixing (we love you Amity)
+   local servers = {}
+   local req = game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true")
+   local body = HttpService:JSONDecode(req)
 
-       if body and body.data then
-           for i, v in next, body.data do
-               if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= JobId then
-                   table.insert(servers, 1, v.id)
-               end
-           end
-       end
+   if body and body.data then
+      for i, v in next, body.data do
+         if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= JobId then
+               table.insert(servers, 1, v.id)
+         end
+      end
+   end
 
-       if #servers > 0 then
-           TeleportService:TeleportToPlaceInstance(PlaceId, servers[math.random(1, #servers)], Players.LocalPlayer)
-       else
-           return notify("Serverhop", "Couldn't find a server.")
-       end
+   if #servers > 0 then
+      TeleportService:TeleportToPlaceInstance(PlaceId, servers[math.random(1, #servers)], Players.LocalPlayer)
    else
-       notify("Incompatible Exploit", "Your exploit does not support this command (missing request)")
+      return notify("Serverhop", "Couldn't find a server.")
    end
 end)
 
@@ -7039,33 +7041,37 @@ end)
 
 local Noclipping = nil
 addcmd('noclip',{},function(args, speaker)
-  Clip = false
-  wait(0.1)
-  local function NoclipLoop()
-     if Clip == false and speaker.Character ~= nil then
-        for _, child in pairs(speaker.Character:GetDescendants()) do
-           if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
-              child.CanCollide = false
-           end
-        end
-     end
-  end
-  Noclipping = RunService.Stepped:Connect(NoclipLoop)
+	Clip = false
+	wait(0.1)
+	local function NoclipLoop()
+		if Clip == false and speaker.Character ~= nil then
+			for _, child in pairs(speaker.Character:GetDescendants()) do
+				if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+					child.CanCollide = false
+				end
+			end
+		end
+	end
+	Noclipping = RunService.Stepped:Connect(NoclipLoop)
+	if args[1] and args[1] == 'nonotify' then return end
+	notify('Noclip','Noclip Enabled')
 end)
 
 addcmd('clip',{'unnoclip'},function(args, speaker)
-  if Noclipping then
-     Noclipping:Disconnect()
-  end
-  Clip = true
+	if Noclipping then
+		Noclipping:Disconnect()
+	end
+	Clip = true
+	if args[1] and args[1] == 'nonotify' then return end
+	notify('Noclip','Noclip Disabled')
 end)
 
 addcmd('togglenoclip',{},function(args, speaker)
-  if Clip then
-     execCmd('noclip')
-  else
-     execCmd('clip')
-  end
+   if Clip then
+      execCmd('noclip')
+   else
+      execCmd('clip')
+   end
 end)
 
 FLYING = false
@@ -7656,213 +7662,211 @@ addcmd('walktowaypoint',{'wtwp'},function(args, speaker)
 end)
 
 addcmd('deletewaypoint',{'dwp','dpos','deleteposition','deletepos'},function(args, speaker)
-  for i,v in pairs(WayPoints) do
-     if v.NAME:lower() == tostring(getstring(1)):lower() then
-        notify('Modified Waypoints',"Deleted waypoint: " .. v.NAME)
-        table.remove(WayPoints, i)
-     end
-  end
-  if AllWaypoints ~= nil and #AllWaypoints > 0 then
-     for i,v in pairs(AllWaypoints) do
-        if v.NAME:lower() == tostring(getstring(1)):lower() then
-           if not v.GAME or v.GAME == PlaceId then
-              table.remove(AllWaypoints, i)
-           end
-        end
-     end
-  end
-  for i,v in pairs(pWayPoints) do
-     if v.NAME:lower() == tostring(getstring(1)):lower() then
-        notify('Modified Waypoints',"Deleted waypoint: " .. v.NAME)
-        table.remove(pWayPoints, i)
-     end
-  end
-  refreshwaypoints()
-  updatesaves()
+   for i,v in pairs(WayPoints) do
+      if v.NAME:lower() == tostring(getstring(1)):lower() then
+         notify('Modified Waypoints',"Deleted waypoint: " .. v.NAME)
+         table.remove(WayPoints, i)
+      end
+   end
+   if AllWaypoints ~= nil and #AllWaypoints > 0 then
+      for i,v in pairs(AllWaypoints) do
+         if v.NAME:lower() == tostring(getstring(1)):lower() then
+            if not v.GAME or v.GAME == PlaceId then
+               table.remove(AllWaypoints, i)
+            end
+         end
+      end
+   end
+   for i,v in pairs(pWayPoints) do
+      if v.NAME:lower() == tostring(getstring(1)):lower() then
+         notify('Modified Waypoints',"Deleted waypoint: " .. v.NAME)
+         table.remove(pWayPoints, i)
+      end
+   end
+   refreshwaypoints()
+   updatesaves()
 end)
 
 addcmd('clearwaypoints',{'cwp','clearpositions','cpos','clearpos'},function(args, speaker)
-  WayPoints = {}
-  pWayPoints = {}
-  refreshwaypoints()
-  updatesaves()
-  AllWaypoints = {}
-  notify('Modified Waypoints','Removed all waypoints')
+   WayPoints = {}
+   pWayPoints = {}
+   refreshwaypoints()
+   updatesaves()
+   AllWaypoints = {}
+   notify('Modified Waypoints','Removed all waypoints')
 end)
 
 addcmd('cleargamewaypoints',{'cgamewp'},function(args, speaker)
-  for i,v in pairs(WayPoints) do
-     if v.GAME == PlaceId then
-        table.remove(WayPoints, i)
-     end
-  end
-  if AllWaypoints ~= nil and #AllWaypoints > 0 then
-     for i,v in pairs(AllWaypoints) do
-        if v.GAME == PlaceId then
-           table.remove(AllWaypoints, i)
-        end
-     end
-  end
-  for i,v in pairs(pWayPoints) do
-     if v.GAME == PlaceId then
-        table.remove(pWayPoints, i)
-     end
-  end
-  refreshwaypoints()
-  updatesaves()
-  notify('Modified Waypoints','Deleted game waypoints')
+   for i,v in pairs(WayPoints) do
+      if v.GAME == PlaceId then
+         table.remove(WayPoints, i)
+      end
+   end
+   if AllWaypoints ~= nil and #AllWaypoints > 0 then
+      for i,v in pairs(AllWaypoints) do
+         if v.GAME == PlaceId then
+            table.remove(AllWaypoints, i)
+         end
+      end
+   end
+   for i,v in pairs(pWayPoints) do
+      if v.GAME == PlaceId then
+         table.remove(pWayPoints, i)
+      end
+   end
+   refreshwaypoints()
+   updatesaves()
+   notify('Modified Waypoints','Deleted game waypoints')
 end)
 
-
 local coreGuiTypeNames = {
-  -- predefined aliases
-  ["inventory"] = Enum.CoreGuiType.Backpack,
-  ["leaderboard"] = Enum.CoreGuiType.PlayerList,
-  ["emotes"] = Enum.CoreGuiType.EmotesMenu
+   -- predefined aliases
+   ["inventory"] = Enum.CoreGuiType.Backpack,
+   ["leaderboard"] = Enum.CoreGuiType.PlayerList,
+   ["emotes"] = Enum.CoreGuiType.EmotesMenu
 }
 
 -- Load the full list of enums
 for _, enumItem in ipairs(Enum.CoreGuiType:GetEnumItems()) do
-  coreGuiTypeNames[enumItem.Name:lower()] = enumItem
+   coreGuiTypeNames[enumItem.Name:lower()] = enumItem
 end
 
 addcmd('enable',{},function(args, speaker)
-  local input = args[1] and args[1]:lower()
-  if input then
-     if input == "reset" then
-        StarterGui:SetCore("ResetButtonCallback", true)
-     else
-        local coreGuiType = coreGuiTypeNames[input]
-        if coreGuiType then
-           StarterGui:SetCoreGuiEnabled(coreGuiType, true)
-        end
-     end
-  end
+   local input = args[1] and args[1]:lower()
+   if input then
+      if input == "reset" then
+         StarterGui:SetCore("ResetButtonCallback", true)
+      else
+         local coreGuiType = coreGuiTypeNames[input]
+         if coreGuiType then
+            StarterGui:SetCoreGuiEnabled(coreGuiType, true)
+         end
+      end
+   end
 end)
 
 addcmd('disable',{},function(args, speaker)
-  local input = args[1] and args[1]:lower()
-  if input then
-     if input == "reset" then
-        StarterGui:SetCore("ResetButtonCallback", false)
-     else
-        local coreGuiType = coreGuiTypeNames[input]
-        if coreGuiType then
-           StarterGui:SetCoreGuiEnabled(coreGuiType, false)
-        end
-     end
-  end
+   local input = args[1] and args[1]:lower()
+   if input then
+      if input == "reset" then
+         StarterGui:SetCore("ResetButtonCallback", false)
+      else
+         local coreGuiType = coreGuiTypeNames[input]
+         if coreGuiType then
+            StarterGui:SetCoreGuiEnabled(coreGuiType, false)
+         end
+      end
+   end
 end)
-
 
 local invisGUIS = {}
 addcmd('showguis',{},function(args, speaker)
-  for i,v in pairs(speaker:FindFirstChildWhichIsA("PlayerGui"):GetDescendants()) do
-     if (v:IsA("Frame") or v:IsA("ImageLabel") or v:IsA("ScrollingFrame")) and not v.Visible then
-        v.Visible = true
-        if not FindInTable(invisGUIS,v) then
-           table.insert(invisGUIS,v)
-        end
-     end
-  end
+   for i,v in pairs(speaker:FindFirstChildWhichIsA("PlayerGui"):GetDescendants()) do
+      if (v:IsA("Frame") or v:IsA("ImageLabel") or v:IsA("ScrollingFrame")) and not v.Visible then
+         v.Visible = true
+         if not FindInTable(invisGUIS,v) then
+            table.insert(invisGUIS,v)
+         end
+      end
+   end
 end)
 
 addcmd('unshowguis',{},function(args, speaker)
-  for i,v in pairs(invisGUIS) do
-     v.Visible = false
-  end
-  invisGUIS = {}
+   for i,v in pairs(invisGUIS) do
+      v.Visible = false
+   end
+   invisGUIS = {}
 end)
 
 local hiddenGUIS = {}
 addcmd('hideguis',{},function(args, speaker)
-  for i,v in pairs(speaker:FindFirstChildWhichIsA("PlayerGui"):GetDescendants()) do
-     if (v:IsA("Frame") or v:IsA("ImageLabel") or v:IsA("ScrollingFrame")) and v.Visible then
-        v.Visible = false
-        if not FindInTable(hiddenGUIS,v) then
-           table.insert(hiddenGUIS,v)
-        end
-     end
-  end
+   for i,v in pairs(speaker:FindFirstChildWhichIsA("PlayerGui"):GetDescendants()) do
+      if (v:IsA("Frame") or v:IsA("ImageLabel") or v:IsA("ScrollingFrame")) and v.Visible then
+         v.Visible = false
+         if not FindInTable(hiddenGUIS,v) then
+            table.insert(hiddenGUIS,v)
+         end
+      end
+   end
 end)
 
 addcmd('unhideguis',{},function(args, speaker)
-  for i,v in pairs(hiddenGUIS) do
-     v.Visible = true
-  end
-  hiddenGUIS = {}
+   for i,v in pairs(hiddenGUIS) do
+      v.Visible = true
+   end
+   hiddenGUIS = {}
 end)
 
 function deleteGuisAtPos()
-  pcall(function()
-     local guisAtPosition = Players.LocalPlayer.PlayerGui:GetGuiObjectsAtPosition(IYMouse.X, IYMouse.Y)
-     for _, gui in pairs(guisAtPosition) do
-        if gui.Visible == true then
-           gui:Destroy()
-        end
-     end
-  end)
+   pcall(function()
+      local guisAtPosition = Players.LocalPlayer.PlayerGui:GetGuiObjectsAtPosition(IYMouse.X, IYMouse.Y)
+      for _, gui in pairs(guisAtPosition) do
+         if gui.Visible == true then
+            gui:Destroy()
+         end
+      end
+   end)
 end
 
 local deleteGuiInput
 addcmd('guidelete',{},function(args, speaker)
-  deleteGuiInput = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-     if not gameProcessedEvent then
-        if input.KeyCode == Enum.KeyCode.Backspace then
-           deleteGuisAtPos()
-        end
-     end
-  end)
-  notify('GUI Delete Enabled','Hover over a GUI and press backspace to delete it')
+   deleteGuiInput = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+      if not gameProcessedEvent then
+         if input.KeyCode == Enum.KeyCode.Backspace then
+            deleteGuisAtPos()
+         end
+      end
+   end)
+   notify('GUI Delete Enabled','Hover over a GUI and press backspace to delete it')
 end)
 
 addcmd('unguidelete',{'noguidelete'},function(args, speaker)
-  if deleteGuiInput then deleteGuiInput:Disconnect() end
-  notify('GUI Delete Disabled','GUI backspace delete has been disabled')
+   if deleteGuiInput then deleteGuiInput:Disconnect() end
+   notify('GUI Delete Disabled','GUI backspace delete has been disabled')
 end)
 
 local wasStayOpen = StayOpen
 addcmd('hideiy',{},function(args, speaker)
-  isHidden = true
-  wasStayOpen = StayOpen
-  if StayOpen == true then
-     StayOpen = false
-     On.BackgroundTransparency = 1
-  end
-  minimizeNum = 0
-  minimizeHolder()
-  if not (args[1] and tostring(args[1]) == 'nonotify') then notify('IY Hidden','You can press the prefix key to access the command bar') end
+   isHidden = true
+   wasStayOpen = StayOpen
+   if StayOpen == true then
+      StayOpen = false
+      On.BackgroundTransparency = 1
+   end
+   minimizeNum = 0
+   minimizeHolder()
+   if not (args[1] and tostring(args[1]) == 'nonotify') then notify('IY Hidden','You can press the prefix key to access the command bar') end
 end)
 
 addcmd('showiy',{'unhideiy'},function(args, speaker)
-  isHidden = false
-  minimizeNum = -20
-  if wasStayOpen then
-     maximizeHolder()
-     StayOpen = true
-     On.BackgroundTransparency = 0
-  else
-     minimizeHolder()
-  end
+   isHidden = false
+   minimizeNum = -20
+   if wasStayOpen then
+      maximizeHolder()
+      StayOpen = true
+      On.BackgroundTransparency = 0
+   else
+      minimizeHolder()
+   end
 end)
 
 addcmd('rec', {'record'}, function(args, speaker)
-  return COREGUI:ToggleRecording()
+   return COREGUI:ToggleRecording()
 end)
 
 addcmd('screenshot', {'scrnshot'}, function(args, speaker)
-  return COREGUI:TakeScreenshot()
+   return COREGUI:TakeScreenshot()
 end)
 
 addcmd('togglefs', {'togglefullscreen'}, function(args, speaker)
-  return GuiService:ToggleFullscreen()
+   return GuiService:ToggleFullscreen()
 end)
 
 addcmd('inspect', {'examine'}, function(args, speaker)
-  for _, v in ipairs(getPlayer(args[1], speaker)) do
-     GuiService:CloseInspectMenu()
-     GuiService:InspectPlayerFromUserId(Players[v].UserId)
-  end
+   for _, v in ipairs(getPlayer(args[1], speaker)) do
+      GuiService:CloseInspectMenu()
+      GuiService:InspectPlayerFromUserId(Players[v].UserId)
+   end
 end)
 
 addcmd("savegame", {"saveplace"}, function(args, speaker)
@@ -7876,30 +7880,34 @@ addcmd("savegame", {"saveplace"}, function(args, speaker)
 end)
 
 addcmd('clearerror',{'clearerrors'},function(args, speaker)
-  GuiService:ClearError()
+   GuiService:ClearError()
 end)
 
 addcmd('clientantikick',{'antikick'},function(args, speaker)
-  if not hookmetamethod then 
-     return notify('Incompatible Exploit','Your exploit does not support this command (missing hookmetamethod)')
-  end
-  local LocalPlayer = Players.LocalPlayer
-  local oldhmmi
-  local oldhmmnc
-  oldhmmi = hookmetamethod(game, "__index", function(self, method)
-     if self == LocalPlayer and method:lower() == "kick" then
-        return error("Expected ':' not '.' calling member function Kick", 2)
-     end
-     return oldhmmi(self, method)
-  end)
-  oldhmmnc = hookmetamethod(game, "__namecall", function(self, ...)
-     if self == LocalPlayer and getnamecallmethod():lower() == "kick" then
-        return
-     end
-     return oldhmmnc(self, ...)
-  end)
-
-  notify('Client Antikick','Client anti kick is now active (only effective on localscript kick)')
+	if not hookmetamethod then 
+	    return notify('Incompatible Exploit','Your exploit does not support this command (missing hookmetamethod)')
+	end
+	local LocalPlayer = Players.LocalPlayer
+	local oldhmmi
+	local oldhmmnc
+	local oldKickFunction
+	if hookfunction then
+	    oldKickFunction = hookfunction(LocalPlayer.Kick, function() end)
+	end
+	oldhmmi = hookmetamethod(game, "__index", function(self, method)
+	    if self == LocalPlayer and method:lower() == "kick" then
+	        return error("Expected ':' not '.' calling member function Kick", 2)
+	    end
+	    return oldhmmi(self, method)
+	end)
+	oldhmmnc = hookmetamethod(game, "__namecall", function(self, ...)
+	    if self == LocalPlayer and getnamecallmethod():lower() == "kick" then
+	        return
+	    end
+	    return oldhmmnc(self, ...)
+	end)
+	
+	notify('Client Antikick','Client anti kick is now active (only effective on localscript kick)')
 end)
 
 allow_rj = true
@@ -11925,7 +11933,7 @@ addcmd('loopfling', {}, function(target, speaker)
    end
 end)
 
-addcmd('loopfling', {}, function(speaker)
+addcmd('unloopfling', {}, function(speaker)
    execCmd('unvfly')
    execCmd('unfling')
    execCmd('unloopgoto')
@@ -11944,65 +11952,144 @@ addcmd('togglefling',{},function(args, speaker)
 end)
 
 addcmd("flyfling", {}, function(args, speaker)
-   execCmd("unvehiclefly\\unfling\\unnoclip")
-   wait()
-   execCmd("vehiclefly\\fling\\noclip")
+   execCmd("unvehiclefly\\unwalkfling")
+   task.wait()
+   vehicleflyspeed = tonumber(args[1]) or vehicleflyspeed
+   execCmd("vehiclefly\\walkfling")
 end)
 
 addcmd("unflyfling", {}, function(args, speaker)
-   execCmd("unvehiclefly\\unfling\\unnoclip\\breakvelocity")
+   execCmd("unvehiclefly\\unwalkfling\\breakvelocity")
 end)
 
 addcmd("toggleflyfling", {}, function(args, speaker)
    execCmd(flinging and "unflyfling" or "flyfling")
 end)
 
+walkflinging = false
+addcmd("walkfling", {}, function(args, speaker)
+    execCmd("unwalkfling")
+    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+    if humanoid then
+        humanoid.Died:Connect(function()
+            execCmd("unwalkfling")
+        end)
+    end
+
+    execCmd("noclip nonotify")
+    walkflinging = true
+    repeat RunService.Heartbeat:Wait()
+        local character = speaker.Character
+        local root = getRoot(character)
+        local vel, movel = nil, 0.1
+
+        while not (character and character.Parent and root and root.Parent) do
+            RunService.Heartbeat:Wait()
+            character = speaker.Character
+            root = getRoot(character)
+        end
+
+        vel = root.Velocity
+        root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+
+        RunService.RenderStepped:Wait()
+        if character and character.Parent and root and root.Parent then
+            root.Velocity = vel
+        end
+
+        RunService.Stepped:Wait()
+        if character and character.Parent and root and root.Parent then
+            root.Velocity = vel + Vector3.new(0, movel, 0)
+            movel = movel * -1
+        end
+    until walkflinging == false
+end)
+
+addcmd("unwalkfling", {"nowalkfling"}, function(args, speaker)
+    walkflinging = false
+    execCmd("unnoclip nonotify")
+end)
+
+addcmd("togglewalkfling", {}, function(args, speaker)
+    execCmd(walkflinging and "unwalkfling" or "walkfling")
+end)
+
 addcmd('invisfling',{},function(args, speaker)
-  local ch = speaker.Character
-  local prt=Instance.new("Model")
-  prt.Parent = speaker.Character
-  local z1 = Instance.new("Part")
-  z1.Name="Torso"
-  z1.CanCollide = false
-  z1.Anchored = true
-  local z2 = Instance.new("Part")
-  z2.Name="Head"
-  z2.Parent = prt
-  z2.Anchored = true
-  z2.CanCollide = false
-  local z3 =Instance.new("Humanoid")
-  z3.Name="Humanoid"
-  z3.Parent = prt
-  z1.Position = Vector3.new(0,9999,0)
-  speaker.Character=prt
-  wait(3)
-  speaker.Character=ch
-  wait(3)
-  local Hum = Instance.new("Humanoid")
-  z2:Clone()
-  Hum.Parent = speaker.Character
-  local root =  getRoot(speaker.Character)
-  for i,v in pairs(speaker.Character:GetChildren()) do
-     if v ~= root and  v.Name ~= "Humanoid" then
-        v:Destroy()
-     end
-  end
-  root.Transparency = 0
-  root.Color = Color3.new(1, 1, 1)
-  local invisflingStepped
-  invisflingStepped = RunService.Stepped:Connect(function()
-     if speaker.Character and getRoot(speaker.Character) then
-        getRoot(speaker.Character).CanCollide = false
-     else
-        invisflingStepped:Disconnect()
-     end
-  end)
-  sFLY()
-  workspace.CurrentCamera.CameraSubject = root
-  local bambam = Instance.new("BodyThrust")
-  bambam.Parent = getRoot(speaker.Character)
-  bambam.Force = Vector3.new(99999,99999*10,99999)
-  bambam.Location = getRoot(speaker.Character).Position
+	local ch = speaker.Character
+	ch:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+	local prt=Instance.new("Model")
+	prt.Parent = speaker.Character
+	local z1 = Instance.new("Part")
+	z1.Name="Torso"
+	z1.CanCollide = false
+	z1.Anchored = true
+	local z2 = Instance.new("Part")
+	z2.Name="Head"
+	z2.Parent = prt
+	z2.Anchored = true
+	z2.CanCollide = false
+	local z3 =Instance.new("Humanoid")
+	z3.Name="Humanoid"
+	z3.Parent = prt
+	z1.Position = Vector3.new(0,9999,0)
+	speaker.Character=prt
+	wait(3)
+	speaker.Character=ch
+	wait(3)
+	local Hum = Instance.new("Humanoid")
+	z2:Clone()
+	Hum.Parent = speaker.Character
+	local root =  getRoot(speaker.Character)
+	for i,v in pairs(speaker.Character:GetChildren()) do
+		if v ~= root and  v.Name ~= "Humanoid" then
+			v:Destroy()
+		end
+	end
+	root.Transparency = 0
+	root.Color = Color3.new(1, 1, 1)
+	local invisflingStepped
+	invisflingStepped = RunService.Stepped:Connect(function()
+		if speaker.Character and getRoot(speaker.Character) then
+			getRoot(speaker.Character).CanCollide = false
+		else
+			invisflingStepped:Disconnect()
+		end
+	end)
+	sFLY()
+	workspace.CurrentCamera.CameraSubject = root
+	local bambam = Instance.new("BodyThrust")
+	bambam.Parent = getRoot(speaker.Character)
+	bambam.Force = Vector3.new(99999,99999*10,99999)
+	bambam.Location = getRoot(speaker.Character).Position
+end)
+
+addcmd("antifling", {}, function(args, speaker)
+    if antifling then
+        antifling:Disconnect()
+        antifling = nil
+    end
+    antifling = RunService.Stepped:Connect(function()
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= speaker and player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+addcmd("unantifling", {}, function(args, speaker)
+    if antifling then
+        antifling:Disconnect()
+        antifling = nil
+    end
+end)
+
+addcmd("toggleantifling", {}, function(args, speaker)
+    execCmd(antifling and "unantifling" or "antifling")
 end)
 
 function attach(speaker,target)

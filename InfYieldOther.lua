@@ -17,7 +17,7 @@ if not game:IsLoaded() then
    notLoaded:Destroy()
 end
 
-currentVersion = "7.5.5"
+currentVersion = "7.5.7"
 
 Holder = Instance.new("Frame")
 getgenv().Holder_Frame = Holder
@@ -11919,8 +11919,12 @@ function findplr(args)
    end
 end
 
+local is_Flinging_Plr = false
+local Flinging_Target_Name = nil
 addcmd('loopfling',{},function(args, speaker)
    local players = getPlayer(args[1], speaker)
+   local character = speaker.Character or Players.LocalPlayer.Character
+   local human = character:FindFirstChildWhichIsA("Humanoid")
 
    getgenv().execCmd('unvfly')
    getgenv().execCmd('unfling')
@@ -11932,7 +11936,8 @@ addcmd('loopfling',{},function(args, speaker)
    for i,v in pairs(players) do
       local TargetPlayer = Players[v]
       local TargetChar = TargetPlayer.Character or TargetPlayer.CharacterAdded:Wait()
-
+      is_Flinging_Plr = true
+      Flinging_Target_Name = TargetPlayer
       getgenv().execCmd('vfly 7')
       getgenv().execCmd('fling')
       getgenv().execCmd('loopgoto '..TargetPlayer.Name..' 0 0')
@@ -11940,16 +11945,42 @@ addcmd('loopfling',{},function(args, speaker)
       getgenv().execCmd('antivoid')
       getgenv().execCmd('walkfling')
    end
+   human.Died:Connect(function()
+      getgenv().execCmd('unvfly')
+      getgenv().execCmd('unfling')
+      getgenv().execCmd('unloopgoto')
+      getgenv().execCmd('unview')
+      getgenv().execCmd('unantivoid')
+      getgenv().execCmd('unwalkfling')
+   end)
+   Players.LocalPlayer.CharacterAdded:Connect(function(NewCharacter)
+      Players.LocalPlayer.CharacterAdded:Wait()
+      task.wait(0.2)
+      if is_Flinging_Plr then
+         local TargetPlayer = Flinging_Target_Name
+
+         getgenv().execCmd('vfly 7')
+         getgenv().execCmd('fling')
+         getgenv().execCmd('loopgoto '..TargetPlayer.Name..' 0 0')
+         getgenv().execCmd('view '..TargetPlayer.Name)
+         getgenv().execCmd('antivoid')
+         getgenv().execCmd('walkfling')
+      else
+         return 
+      end
+   end)
 end)
 
 addcmd('unloopfling', {}, function(speaker)
-   execCmd('unvfly')
-   execCmd('unfling')
-   execCmd('unloopgoto')
-   execCmd('unloopgoto')
-   execCmd('unview')
-   execCmd('unantivoid')
-   execCmd('reset')
+   is_Flinging_Plr = false
+   Flinging_Target_Name = nil
+   getgenv().execCmd('unvfly')
+   getgenv().execCmd('unfling')
+   getgenv().execCmd('unloopgoto')
+   getgenv().execCmd('unloopgoto')
+   getgenv().execCmd('unview')
+   getgenv().execCmd('unantivoid')
+   getgenv().execCmd('reset')
 end)
 
 addcmd('togglefling',{},function(args, speaker)

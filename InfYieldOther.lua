@@ -11926,6 +11926,7 @@ addcmd('loopfling',{},function(args, speaker)
    getgenv().execCmd('unfling')
    getgenv().execCmd('unloopgoto')
    getgenv().execCmd('unantivoid')
+   getgenv().execCmd('unwalkfling')
    task.wait(0.1)
 
    for i,v in pairs(players) do
@@ -11937,6 +11938,7 @@ addcmd('loopfling',{},function(args, speaker)
       getgenv().execCmd('loopgoto '..TargetPlayer.Name..' 0 0')
       getgenv().execCmd('view '..TargetPlayer.Name)
       getgenv().execCmd('antivoid')
+      getgenv().execCmd('walkfling')
    end
 end)
 

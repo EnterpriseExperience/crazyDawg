@@ -2855,7 +2855,7 @@ reference = (function()
 		{113,"TextLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Font=4,Name="Header",Parent={112},Position=UDim2.new(0,8,0,5),Size=UDim2.new(1,-8,0,20),Text="Get Further Help",TextColor3=Color3.new(1,1,1),TextSize=20,TextXAlignment=0,ZIndex=10,}},
 		{114,"TextLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Font=3,Name="Text",Parent={112},Position=UDim2.new(0,8,0,30),Size=UDim2.new(1,-8,0,32),Text="You can join the Discord server to get support with IY,  and read up on more documentation such as the Plugin API.",TextColor3=Color3.new(1,1,1),TextSize=14,TextWrapped=true,TextXAlignment=0,ZIndex=10,}},
 		{115,"Frame",{BackgroundColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),BorderSizePixel=0,Name="Line",Parent={112},Position=UDim2.new(0,10,1,-1),Size=UDim2.new(1,-20,0,1),Visible=false,ZIndex=10,}},
-		{116,"TextButton",{BackgroundColor3=Color3.new(0.48627451062202,0.61960786581039,0.85098040103912),BorderColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),Font=4,Name="InviteButton",Parent={112},Position=UDim2.new(0,5,0,75),Size=UDim2.new(1,-10,0,25),Text="Copy Discord Invite Link (https://discord.gg/0)",TextColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),TextSize=16,ZIndex=10,}},
+		{116,"TextButton",{BackgroundColor3=Color3.new(0.48627451062202,0.61960786581039,0.85098040103912),BorderColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),Font=4,Name="InviteButton",Parent={112},Position=UDim2.new(0,5,0,75),Size=UDim2.new(1,-10,0,25),Text="Copy Discord Invite Link",TextColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),TextSize=16,ZIndex=10,}},
 	})
 	for i,v in pairs(main.Content.List:GetDescendants()) do
 		if v:IsA("TextLabel") then
@@ -2873,7 +2873,7 @@ reference = (function()
 	local lastPress = nil
 	inviteButton.MouseButton1Click:Connect(function()
 		if everyClipboard then
-			toClipboard("https://discord.gg/0")
+			toClipboard("")
 			inviteButton.Text = "Copied"
 		else
 			inviteButton.Text = "No Clipboard Function, type out the link"
@@ -2882,7 +2882,7 @@ reference = (function()
 		lastPress = pressTime
 		wait(2)
 		if lastPress ~= pressTime then return end
-		inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/0)"
+		inviteButton.Text = "Copy Discord Invite Link"
 	end)
 	dragGUI(main)
 	main.Parent = ScaledHolder
@@ -3935,30 +3935,30 @@ end
 
 avatarcache = {}
 function sendChatWebhook(player, message)
-  if httprequest and vtype(logsWebhook, "string") then
-    local id = player.UserId
-    local avatar = avatarcache[id]
-    if not avatar then
-      local d = HttpService:JSONDecode(httprequest({
-        Url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. id .. "&size=420x420&format=Png&isCircular=false",
-        Method = "GET"
-      }).Body)["data"]
-      avatar = d and d[1].state == "Completed" and d[1].imageUrl or "https://files.catbox.moe/i968v2.jpg"
-      avatarcache[id] = avatar
-    end
-    local log = HttpService:JSONEncode({
-      content = message,
-      avatar_url = avatar,
-      username = formatUsername(player),
-      allowed_mentions = {parse = {}}
-    })
-    httprequest({
-      Url = logsWebhook,
-      Method = "POST",
-      Headers = {["Content-Type"] = "application/json"},
-      Body = log
-    })
-  end
+	if httprequest and vtype(logsWebhook, "string") then
+		local id = player.UserId
+		local avatar = avatarcache[id]
+		if not avatar then
+			local d = HttpService:JSONDecode(httprequest({
+			Url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. id .. "&size=420x420&format=Png&isCircular=false",
+			Method = "GET"
+			}).Body)["data"]
+			avatar = d and d[1].state == "Completed" and d[1].imageUrl or "https://files.catbox.moe/i968v2.jpg"
+			avatarcache[id] = avatar
+		end
+		local log = HttpService:JSONEncode({
+			content = message,
+			avatar_url = avatar,
+			username = formatUsername(player),
+			allowed_mentions = {parse = {}}
+		})
+		httprequest({
+			Url = logsWebhook,
+			Method = "POST",
+			Headers = {["Content-Type"] = "application/json"},
+			Body = log
+		})
+	end
 end
 
 ChatLog = function(player)
@@ -5061,7 +5061,7 @@ local lastCmds = {}
 local historyCount = 0
 local split=" "
 local lastBreakTime = 0
-function execCmd(cmdStr,speaker,store)
+getgenv().execCmd = getgenv().execCmd or function(cmdStr,speaker,store)
 	cmdStr = cmdStr:gsub("%s+$","")
 	task.spawn(function()
 		local rawCmdStr = cmdStr
@@ -6460,7 +6460,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/InfYieldOther.lua'))()")
 	end
 end)
 
@@ -6503,30 +6503,6 @@ addcmd('clraliases',{},function(args, speaker)
 	notify('Aliases Modified','Removed all aliases')
 	updatesaves()
 	refreshaliases()
-end)
-
-addcmd('discord', {'support', 'help'}, function(args, speaker)
-	if everyClipboard then
-		toClipboard('https://discord.com/invite/0')
-		notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/0')
-	else
-		notify('Discord Invite', 'discord.gg/0')
-	end
-	if httprequest then
-		httprequest({
-			Url = 'http://127.0.0.1:6463/rpc?v=1',
-			Method = 'POST',
-			Headers = {
-				['Content-Type'] = 'application/json',
-				Origin = 'https://discord.com'
-			},
-			Body = HttpService:JSONEncode({
-				cmd = 'INVITE_BROWSER',
-				nonce = HttpService:GenerateGUID(false),
-				args = {code = '0'}
-			})
-		})
-	end
 end)
 
 addcmd('keepiy', {}, function(args, speaker)
@@ -6918,28 +6894,28 @@ addcmd("autorejoin", {"autorj"}, function(args, speaker)
 end)
 
 addcmd("serverhop", {"shop"}, function(args, speaker)
-    -- thanks to Amity for fixing
-    local servers = {}
-    local req = game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true")
-    local body = HttpService:JSONDecode(req)
+	-- thanks to Amity for fixing
+	local servers = {}
+	local req = game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true")
+	local body = HttpService:JSONDecode(req)
 
-    if body and body.data then
-        for i, v in next, body.data do
-            if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= JobId then
-                table.insert(servers, 1, v.id)
-            end
-        end
-    end
+	if body and body.data then
+		for i, v in next, body.data do
+			if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= JobId then
+				table.insert(servers, 1, v.id)
+			end
+		end
+	end
 
-    if #servers > 0 then
-        TeleportService:TeleportToPlaceInstance(PlaceId, servers[math.random(1, #servers)], Players.LocalPlayer)
-    else
-        return notify("Serverhop", "Couldn't find a server.")
-    end
+	if #servers > 0 then
+		TeleportService:TeleportToPlaceInstance(PlaceId, servers[math.random(1, #servers)], Players.LocalPlayer)
+	else
+		return notify("Serverhop", "Couldn't find a server.")
+	end
 end)
 
 addcmd("exit", {}, function(args, speaker)
-    game:Shutdown()
+   game:Shutdown()
 end)
 
 local Noclipping = nil
@@ -8692,20 +8668,20 @@ addcmd('uninvisibleparts',{'uninvisparts'},function(args, speaker)
 end)
 
 addcmd("btools", {}, function(args, speaker)
-    for i = 1, 4 do
-        local Tool = Instance.new("HopperBin")
-        Tool.BinType = i
-        Tool.Name = randomString()
-        Tool.Parent = speaker:FindFirstChildWhichIsA("Backpack")
-    end
+	for i = 1, 4 do
+		local Tool = Instance.new("HopperBin")
+		Tool.BinType = i
+		Tool.Name = randomString()
+		Tool.Parent = speaker:FindFirstChildWhichIsA("Backpack")
+	end
 end)
 
 addcmd("f3x", {"fex"}, function(args, speaker)
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/f3x.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/f3x.lua"))()
 end)
 
 addcmd("partpath", {"partname"}, function(args, speaker)
-    selectPart()
+   selectPart()
 end)
 
 addcmd("antiafk", {"antiidle"}, function(args, speaker)
@@ -8767,7 +8743,7 @@ addcmd("promptr15", {}, function(args, speaker)
 end)
 
 addcmd("wallwalk", {"walkonwalls"}, function(args, speaker)
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/wallwalker.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/wallwalker.lua"))()
 end)
 
 addcmd('age',{},function(args, speaker)
@@ -13095,7 +13071,7 @@ end)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/version")
+		local versionJson = game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/version")
 		return HttpService:JSONDecode(versionJson)
 	end)
 

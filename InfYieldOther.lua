@@ -118,10 +118,10 @@ local iyassets = {
 
 local function getcustomasset(asset)
    if waxgetcustomasset then
-      local success, result = pcall(function()
+      local ok, result = pcall(function()
          return waxgetcustomasset(asset)
       end)
-      if success and result ~= nil and result ~= "" then
+      if ok and result and result ~= "" then
          return result
       end
    end
@@ -129,19 +129,30 @@ local function getcustomasset(asset)
 end
 
 if makefolder and isfolder and writefile and isfile then
-   pcall(function() -- good executor trust
-      local assets = "https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/"
-      for _, folder in {"infiniteyield", "infiniteyield/assets"} do
-         if not isfolder(folder) then
-            makefolder(folder)
+   pcall(function()
+      local baseUrl = "https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/"
+      for _, folderName in pairs({ "infiniteyield", "infiniteyield/assets" }) do
+         if not isfolder(folderName) then
+            makefolder(folderName)
          end
       end
-      for path in iyassets do
-         if not isfile(path) then
-            writefile(path, game:HttpGet((path:gsub("infiniteyield/", assets))))
+
+      local assetKeys = {}
+      for path in pairs(iyassets) do
+         assetKeys[#assetKeys + 1] = path
+      end
+
+      for i = 1, #assetKeys do
+         local assetPath = assetKeys[i]
+         if not isfile(assetPath) then
+            local url = assetPath:gsub("infiniteyield/", baseUrl)
+            writefile(assetPath, game:HttpGet(url))
          end
       end
-      if IsOnMobile then writefile("infiniteyield/assets/.nomedia") end
+
+      if IsOnMobile then
+         writefile("infiniteyield/assets/.nomedia", "")
+      end
    end)
 end
 

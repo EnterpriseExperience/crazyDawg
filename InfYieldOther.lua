@@ -156,7 +156,7 @@ if makefolder and isfolder and writefile and isfile then
    end)
 end
 
-currentVersion = "7.6.8"
+currentVersion = "7.6.9"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -9936,8 +9936,11 @@ addcmd("animation", {"anim"}, function(args, speaker)
    if args[2] then anim:AdjustSpeed(tostring(args[2])) end
 end)
 
-addcmd("emote", {"em"}, function(args, speaker)
-   local anim = humanoid:PlayEmoteAndGetAnimTrackById(args[1])
+addcmd("emote", {"emote"}, function(args, speaker)
+	if not speaker.Character then return notify("Issue", "Character does not exist, cannot play Emote.") end
+	local humanoid = speaker.Character and speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	if not humanoid then return notify("Issue", "Character does not exist, cannot play Emote.") end
+   humanoid:PlayEmoteAndGetAnimTrackById(args[1])
    if args[2] then anim:AdjustSpeed(tostring(args[2])) end
 end)
 

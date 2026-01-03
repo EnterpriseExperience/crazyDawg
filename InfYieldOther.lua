@@ -2,6 +2,10 @@ if GET_LOADED_IY and not _G.DEBUGGING_IY_VER == true then
    -- error("Infinite Premium is already running!", 0)
    return
 end
+if getgenv().IY_LOADED then
+	-- error("Infinite Yield is already running, you cannot use both at the same time!", 0)
+	return 
+end
 
 pcall(function() getgenv().GET_LOADED_IY = true end)
 if not game:IsLoaded() then game.Loaded:Wait() end

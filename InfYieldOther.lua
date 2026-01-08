@@ -160,7 +160,7 @@ if makefolder and isfolder and writefile and isfile then
    end)
 end
 
-currentVersion = "7.7.0"
+currentVersion = "7.7.1"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -2073,15 +2073,17 @@ function isNumber(str)
 end
 
 function vtype(o, t)
-    if o == nil then return false end
-    if type(o) == "userdata" then return typeof(o) == t end
-    return type(o) == t
+	if o == nil then return false end
+	if type(o) == "userdata" then return typeof(o) == t end
+	return type(o) == t
 end
 
 function getRoot(char)
 	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
 	return rootPart
 end
+wait(0.1)
+getgenv().getRoot = getgenv().getRoot or getRoot
 
 function tools(plr)
 	if plr:FindFirstChildOfClass("Backpack"):FindFirstChildOfClass('Tool') or plr.Character:FindFirstChildOfClass('Tool') then
@@ -4641,6 +4643,7 @@ CMDs[#CMDs + 1] = {NAME = 'destroyheight / dh [num]', DESC = 'Sets FallenPartsDe
 CMDs[#CMDs + 1] = {NAME = 'fakeout', DESC = 'Tp to the void and then back (useful to kill people attached to you)'}
 CMDs[#CMDs + 1] = {NAME = 'antivoid', DESC = 'Prevents you from falling into the void by launching you upwards'}
 CMDs[#CMDs + 1] = {NAME = 'unantivoid / noantivoid', DESC = 'Disables antivoid'}
+CMDs[#CMDs + 1] = {NAME = 'time / settime [num]', DESC = 'Sets the current ClockTime of Lighting.'}
 CMDs[#CMDs + 1] = {NAME = 'fullbright / fb (CLIENT)', DESC = 'Makes the map brighter / more visible'}
 CMDs[#CMDs + 1] = {NAME = 'loopfullbright / loopfb (CLIENT)', DESC = 'Makes the map brighter / more visible but looped'}
 CMDs[#CMDs + 1] = {NAME = 'unloopfullbright / unloopfb', DESC = 'Unloops fullbright'}
@@ -4777,6 +4780,7 @@ CMDs[#CMDs + 1] = {NAME = 'replaceroot', DESC = 'Replaces your characters Humano
 CMDs[#CMDs + 1] = {NAME = 'clearcharappearance / clearchar / clrchar', DESC = 'Removes all accessory, shirt, pants, charactermesh, and bodycolors'}
 CMDs[#CMDs + 1] = {NAME = 'animation / anim [ID] [speed]', DESC = 'Makes your character perform an animation (must be an animation on the marketplace or by roblox/stickmasterluke to replicate)'}
 CMDs[#CMDs + 1] = {NAME = 'emote / em [ID] [speed]', DESC = 'Makes your character perform an emote (must be on the marketplace or by roblox/stickmasterluke to replicate)'}
+CMDs[#CMDs + 1] = {NAME = 'emotesgui / allemotes', DESC = 'Executes Emote GUI, that provides you with all Roblox Emotes.'}
 CMDs[#CMDs + 1] = {NAME = 'dance', DESC = 'Makes you  d a n c e'}
 CMDs[#CMDs + 1] = {NAME = 'undance', DESC = 'Stops dance animations'}
 CMDs[#CMDs + 1] = {NAME = 'spasm', DESC = 'Makes you  c r a z y'}
@@ -9178,37 +9182,37 @@ addcmd('unwalkto',{'nowalkto','unfollow','nofollow'},function(args, speaker)
 end)
 
 addcmd("orbit", {}, function(args, speaker)
-    execCmd("unorbit nonotify")
-    local target = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
-    local root = getRoot(speaker.Character)
-    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-    if target and target.Character and getRoot(target.Character) and root and humanoid then
-        local rotation = 0
-        local speed = tonumber(args[2]) or 0.2
-        local distance = tonumber(args[3]) or 6
-        orbit1 = RunService.Heartbeat:Connect(function()
-            pcall(function()
-                rotation = rotation + speed
-                root.CFrame = CFrame.new(getRoot(target.Character).Position) * CFrame.Angles(0, math.rad(rotation), 0) * CFrame.new(distance, 0, 0)
-            end)
-        end)
-        orbit2 = RunService.RenderStepped:Connect(function()
-            pcall(function()
-                root.CFrame = CFrame.new(root.Position, getRoot(target.Character).Position)
-            end)
-        end)
-        orbit3 = humanoid.Died:Connect(function() execCmd("unorbit") end)
-        orbit4 = humanoid.Seated:Connect(function(value) if value then execCmd("unorbit") end end)
-        notify("Orbit", "Started orbiting " .. formatUsername(target))
-    end
+	execCmd("unorbit nonotify")
+	local target = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
+	local root = getRoot(speaker.Character)
+	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	if target and target.Character and getRoot(target.Character) and root and humanoid then
+		local rotation = 0
+		local speed = tonumber(args[2]) or 0.2
+		local distance = tonumber(args[3]) or 6
+		orbit1 = RunService.Heartbeat:Connect(function()
+			pcall(function()
+				rotation = rotation + speed
+				root.CFrame = CFrame.new(getRoot(target.Character).Position) * CFrame.Angles(0, math.rad(rotation), 0) * CFrame.new(distance, 0, 0)
+			end)
+		end)
+		orbit2 = RunService.RenderStepped:Connect(function()
+			pcall(function()
+				root.CFrame = CFrame.new(root.Position, getRoot(target.Character).Position)
+			end)
+		end)
+		orbit3 = humanoid.Died:Connect(function() execCmd("unorbit") end)
+		orbit4 = humanoid.Seated:Connect(function(value) if value then execCmd("unorbit") end end)
+		notify("Orbit", "Started orbiting " .. formatUsername(target))
+	end
 end)
 
 addcmd("unorbit", {}, function(args, speaker)
-    if orbit1 then orbit1:Disconnect() end
-    if orbit2 then orbit2:Disconnect() end
-    if orbit3 then orbit3:Disconnect() end
-    if orbit4 then orbit4:Disconnect() end
-    if args[1] ~= "nonotify" then notify("Orbit", "Stopped orbiting player") end
+	if orbit1 then orbit1:Disconnect() end
+	if orbit2 then orbit2:Disconnect() end
+	if orbit3 then orbit3:Disconnect() end
+	if orbit4 then orbit4:Disconnect() end
+	if args[1] ~= "nonotify" then notify("Orbit", "Stopped orbiting player") end
 end)
 
 addcmd('freeze',{'fr'},function(args, speaker)
@@ -9225,7 +9229,6 @@ addcmd('freeze',{'fr'},function(args, speaker)
 		end
 	end
 end)
-
 
 addcmd('thaw',{'unfreeze','unfr'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
@@ -9943,12 +9946,26 @@ addcmd("emote", {"emote"}, function(args, speaker)
 	end
 end)
 
+addcmd("emotegui", {"allemotes"}, function(args, speaker)
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Gaze%20emote"))()
+	end)
+end)
+
 addcmd('noanim',{},function(args, speaker)
-	speaker.Character.Animate.Disabled = true
+	if not speaker.Character:FindFirstChild("Animate") then return end
+
+	pcall(function()
+		speaker.Character.Animate.Disabled = true
+	end)
 end)
 
 addcmd('reanim',{},function(args, speaker)
-	speaker.Character.Animate.Disabled = false
+	if not speaker.Character:FindFirstChild("Animate") then return end
+
+	pcall(function()
+		speaker.Character.Animate.Disabled = false
+	end)
 end)
 
 addcmd('animspeed',{},function(args, speaker)
@@ -10449,7 +10466,20 @@ addcmd('remotespy',{'rspy'},function(args, speaker)
 	notify("Loading",'Hold on a sec')
 	-- Full credit to exx, creator of SimpleSpy
 	-- also thanks to Amity for fixing, we love you Amity.
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))()
+	if game.PlaceId == 7041939546 then
+		notify("Hold on a sec", "Loading RemoteSpy (Hydroxide) for Catalog Avatar Creator")
+		local owner = "Upbolt"
+		local branch = "revision"
+
+		local function webImport(file)
+			return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner, branch, file)), file .. '.lua')()
+		end
+
+		webImport("init")
+		webImport("ui/main")
+	else
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))()
+	end
 end)
 
 addcmd('audiologger',{'alogger'},function(args, speaker)
@@ -11323,6 +11353,15 @@ addcmd('touchinterests', {'touchinterest', 'firetouchinterests', 'firetouchinter
 	end
 end)
 
+addcmd('time', {'clocktime', 'settime', 'settimeofday', 'settod'},function(args, speaker)
+	if not args[1] then return end
+	if not isNumber(args[1]) then return end
+
+	pcall(function()
+		Lighting.ClockTime = tonumber(args[1])
+	end)
+end)
+
 addcmd('fullbright',{'fb','fullbrightness'},function(args, speaker)
 	Lighting.Brightness = 2
 	Lighting.ClockTime = 14
@@ -11816,32 +11855,32 @@ addcmd('invisfling',{},function(args, speaker)
 end)
 
 addcmd("antifling", {}, function(args, speaker)
-    if antifling then
-        antifling:Disconnect()
-        antifling = nil
-    end
-    antifling = RunService.Stepped:Connect(function()
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= speaker and player.Character then
-                for _, v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
-                end
-            end
-        end
-    end)
+	if antifling then
+		antifling:Disconnect()
+		antifling = nil
+	end
+	antifling = RunService.Stepped:Connect(function()
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= speaker and player.Character then
+				for _, v in pairs(player.Character:GetDescendants()) do
+					if v:IsA("BasePart") then
+						v.CanCollide = false
+					end
+				end
+			end
+		end
+	end)
 end)
 
 addcmd("unantifling", {}, function(args, speaker)
-    if antifling then
-        antifling:Disconnect()
-        antifling = nil
-    end
+	if antifling then
+		antifling:Disconnect()
+		antifling = nil
+	end
 end)
 
 addcmd("toggleantifling", {}, function(args, speaker)
-    execCmd(antifling and "unantifling" or "antifling")
+   execCmd(antifling and "unantifling" or "antifling")
 end)
 
 function attach(speaker,target)

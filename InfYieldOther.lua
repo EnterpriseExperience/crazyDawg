@@ -10475,9 +10475,6 @@ addcmd('olddex', {'odex'}, function(args, speaker)
 end)
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
-	notify("Loading",'Hold on a sec')
-	-- Full credit to exx, creator of SimpleSpy
-	-- also thanks to Amity for fixing, we love you Amity.
 	if game.PlaceId == 7041939546 then
 		notify("Hold on a sec", "Loading RemoteSpy (Hydroxide) for Catalog Avatar Creator")
 		local owner = "Upbolt"
@@ -10490,6 +10487,7 @@ addcmd('remotespy',{'rspy'},function(args, speaker)
 		webImport("init")
 		webImport("ui/main")
 	else
+		notify("Loading",'Hold on a sec')
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))()
 	end
 end)

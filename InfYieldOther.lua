@@ -9947,9 +9947,21 @@ addcmd("emote", {"emote"}, function(args, speaker)
 end)
 
 addcmd("emotegui", {"allemotes"}, function(args, speaker)
-	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Gaze%20emote"))()
-	end)
+	if getgenv().FreeEmotes_Enabled then
+		if getgenv().notify then
+			return getgenv().notify("Warning", "You already have Free Emotes GUI loaded!", 5)
+		else
+			return 
+		end
+	end
+
+	getgenv().FreeEmotes_Enabled = true
+	if not UserInputService.TouchEnabled then
+		notify("Emotes", "Press F to toggle.")
+	else
+		notify("Emotes", "Toggle with the 'F' button on the left side of your screen.")
+	end
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/flames_emotes_gui_new.lua"))()
 end)
 
 addcmd('noanim',{},function(args, speaker)

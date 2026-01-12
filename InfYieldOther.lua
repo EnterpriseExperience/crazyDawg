@@ -160,7 +160,7 @@ if makefolder and isfolder and writefile and isfile then
    end)
 end
 
-currentVersion = "7.7.1"
+currentVersion = "7.7.3"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -2112,6 +2112,219 @@ function chatMessage(str)
 		TextChatService.TextChannels.RBXGeneral:SendAsync(str)
 	else
 		ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(str, "All")
+	end
+end
+
+getgenv().get_vehicle = getgenv().get_vehicle or function()
+	local players = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
+	local workspaceRef = cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
+	local localPlayer = speaker or players.LocalPlayer
+	if not localPlayer then
+		notify("Error", "LocalPlayer not found? (issue?).")
+		return nil
+	end
+	local folder_names = {
+		"vehicles",
+		"vehicle",
+		"cars",
+		"car",
+		"playercars",
+		"plrcars"
+	}
+	local value_names = {
+		"owner",
+		"player",
+		"driver",
+		"userid",
+		"user_id",
+		"username",
+		"name"
+	}
+	local function matches_folder(name)
+		name = tostring(name):lower()
+		for _, v in ipairs(folder_names) do
+			if name:find(v) then
+				return true
+			end
+		end
+		return false
+	end
+	local function matches_value(val)
+		if val:IsA("ObjectValue") then
+			return val.Value == localPlayer
+		end
+
+		if val:IsA("StringValue") then
+			return tostring(val.Value):lower() == localPlayer.Name:lower()
+		end
+
+		if val:IsA("IntValue") or val:IsA("NumberValue") then
+			return tonumber(val.Value) == localPlayer.UserId
+		end
+
+		return false
+	end
+
+	for _, container in ipairs(workspaceRef:GetChildren()) do
+		if container:IsA("Folder") and matches_folder(container.Name) then
+			for _, model in ipairs(container:GetDescendants()) do
+				if model:IsA("Model") then
+					for _, obj in ipairs(model:GetDescendants()) do
+						if obj:IsA("ValueBase") then
+							if matches_value(obj) then
+								return model
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return nil
+end
+
+getgenv().vehicle_fly = getgenv().vehicle_fly or false
+getgenv().vehicle_fly_speed = getgenv().vehicle_fly_speed or 3
+getgenv().vehiclefly_conns = getgenv().vehiclefly_conns or {}
+getgenv().vehiclefly_control = getgenv().vehiclefly_control or {f=0,b=0,l=0,r=0,q=0,e=0}
+getgenv().vehiclefly_noclip = getgenv().vehiclefly_noclip or false
+getgenv().vehiclefly_collisions = getgenv().vehiclefly_collisions or {}
+local controlModule
+if UserInputService.TouchEnabled then
+	controlModule = require(
+		getgenv().LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
+	)
+end
+
+getgenv().cleanup = function()
+	for _, c in pairs(getgenv().vehiclefly_conns) do
+		pcall(function() c:Disconnect() end)
+	end
+	getgenv().vehiclefly_conns = {}
+
+	if getgenv().vehiclefly_bg then
+		getgenv().vehiclefly_bg:Destroy()
+		getgenv().vehiclefly_bg = nil
+	end
+
+	if getgenv().vehiclefly_bv then
+		getgenv().vehiclefly_bv:Destroy()
+		getgenv().vehiclefly_bv = nil
+	end
+end
+
+getgenv().enable_vehicle_noclip = function()
+	if getgenv().vehiclefly_noclip then return end
+	getgenv().vehiclefly_noclip = true
+	getgenv().vehiclefly_collisions = {}
+   local car = get_vehicle()
+
+	for _, v in ipairs(car:GetDescendants()) do
+		if v:IsA("BasePart") then
+			getgenv().vehiclefly_collisions[v] = v.CanCollide
+			v.CanCollide = false
+		end
+	end
+end
+
+getgenv().disable_vehicle_noclip = function()
+	if not getgenv().vehiclefly_noclip then return end
+	getgenv().vehiclefly_noclip = false
+
+	for part, state in pairs(getgenv().vehiclefly_collisions) do
+		if part and part.Parent then
+			part.CanCollide = state
+		end
+	end
+	getgenv().vehiclefly_collisions = {}
+end
+
+getgenv().start_vehicle_fly = function(model)
+	if getgenv().vehiclefly_bg or getgenv().vehiclefly_bv then return end
+   local car = get_vehicle() or speaker.Character:FindFirstChildWhichIsA("Humanoid").SeatPart
+	if not car then
+		notify("Error", "Could not find a Vehicle, using default (IY) method.")
+		return 
+	end
+   local base = car.Base or car:FindFirstChild("Base")
+
+	local bg = Instance.new("BodyGyro")
+	bg.P = 3e4
+	bg.D = 1e3
+	bg.MaxTorque = Vector3.new(0, 9e9, 0)
+	bg.CFrame = base.CFrame
+	bg.Parent = base
+
+	local bv = Instance.new("BodyVelocity")
+	bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+	bv.Velocity = Vector3.zero
+	bv.Parent = base
+
+	getgenv().vehiclefly_bg = bg
+	getgenv().vehiclefly_bv = bv
+	getgenv().vehiclefly_conns.render = RunService.RenderStepped:Connect(function()
+		if not getgenv().vehicle_fly then return end
+
+		base.AssemblyAngularVelocity = Vector3.zero
+
+		local cam = workspace.CurrentCamera
+		local look = cam.CFrame.LookVector
+		local yaw = math.atan2(-look.X, -look.Z)
+
+		bg.CFrame = CFrame.new(base.Position) * CFrame.Angles(0, yaw, 0)
+
+		local forward, right, up = 0, 0, 0
+
+		if is_mobile then
+			local mv = controlModule:GetMoveVector()
+			forward = -mv.Z
+			right = mv.X
+		else
+			forward = getgenv().vehiclefly_control.f + getgenv().vehiclefly_control.b
+			right = getgenv().vehiclefly_control.l + getgenv().vehiclefly_control.r
+			up = getgenv().vehiclefly_control.q + getgenv().vehiclefly_control.e
+		end
+
+		local target = (cam.CFrame.LookVector * forward + cam.CFrame.RightVector * right + Vector3.new(0, up, 0)) * (45 * getgenv().vehicle_fly_speed)
+		bv.Velocity = bv.Velocity:Lerp(target, 0.25)
+	end)
+
+	if not is_mobile then
+		getgenv().vehiclefly_conns.down = UserInputService.InputBegan:Connect(function(i, g)
+			if g then return end
+			if i.KeyCode == Enum.KeyCode.W then getgenv().vehiclefly_control.f = 1 end
+			if i.KeyCode == Enum.KeyCode.S then getgenv().vehiclefly_control.b = -1 end
+			if i.KeyCode == Enum.KeyCode.A then getgenv().vehiclefly_control.l = -1 end
+			if i.KeyCode == Enum.KeyCode.D then getgenv().vehiclefly_control.r = 1 end
+			if i.KeyCode == Enum.KeyCode.E then getgenv().vehiclefly_control.q = 1 end
+			if i.KeyCode == Enum.KeyCode.Q then getgenv().vehiclefly_control.e = -1 end
+		end)
+
+		getgenv().vehiclefly_conns.up = UserInputService.InputEnded:Connect(function(i)
+			if i.KeyCode == Enum.KeyCode.W then getgenv().vehiclefly_control.f = 0 end
+			if i.KeyCode == Enum.KeyCode.S then getgenv().vehiclefly_control.b = 0 end
+			if i.KeyCode == Enum.KeyCode.A then getgenv().vehiclefly_control.l = 0 end
+			if i.KeyCode == Enum.KeyCode.D then getgenv().vehiclefly_control.r = 0 end
+			if i.KeyCode == Enum.KeyCode.E then getgenv().vehiclefly_control.q = 0 end
+			if i.KeyCode == Enum.KeyCode.Q then getgenv().vehiclefly_control.e = 0 end
+		end)
+	end
+end
+
+getgenv().stop_vehicle_fly = function()
+	getgenv().disable_vehicle_noclip()
+	cleanup()
+	getgenv().vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
+end
+
+getgenv().toggle_vehicle_fly = function()
+	getgenv().vehicle_fly = not getgenv().vehicle_fly
+	if getgenv().vehicle_fly then
+		getgenv().enable_vehicle_noclip()
+		getgenv().start_vehicle_fly()
+	else
+		getgenv().stop_vehicle_fly()
 	end
 end
 
@@ -6900,7 +7113,6 @@ addcmd("autorejoin", {"autorj"}, function(args, speaker)
 end)
 
 addcmd("serverhop", {"shop"}, function(args, speaker)
-	-- thanks to Amity for fixing
 	local servers = {}
 	local req = game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true")
 	local body = HttpService:JSONDecode(req)
@@ -7180,16 +7392,29 @@ addcmd('unfly',{'nofly','novfly','unvehiclefly','novehiclefly','unvfly'},functio
 	if not IsOnMobile then NOFLY() else unmobilefly(speaker) end
 end)
 
-addcmd('vfly',{'vehiclefly'},function(args, speaker)
-	if not IsOnMobile then
-		NOFLY()
-		wait()
-		sFLY(true)
-	else
-		mobilefly(speaker, true)
+addcmd('vfly', {'vehiclefly'}, function(args, speaker)
+	local vehicle
+	if typeof(getgenv().get_vehicle) == "function" then
+		local ok, result = pcall(getgenv().get_vehicle, speaker)
+		if ok then
+			vehicle = result
+		end
 	end
+
+	if vehicle then
+		getgenv().toggle_vehicle_fly()
+	else
+		if not IsOnMobile then
+			NOFLY()
+			task.wait()
+			sFLY(true)
+		else
+			mobilefly(speaker, true)
+		end
+	end
+
 	if args[1] and isNumber(args[1]) then
-		vehicleflyspeed = args[1]
+		getgenv().vehicle_fly_speed = tonumber(args[1])
 	end
 end)
 
@@ -10473,6 +10698,48 @@ addcmd('olddex', {'odex'}, function(args, speaker)
 
 	Load(Dex)
 end)
+
+local executor_string = nil
+local function executor_contains(substr)
+	if type(executor_string) ~= "string" then
+		return false
+	end
+	return string.find(string.lower(executor_string), string.lower(substr), 1, true) ~= nil
+end
+
+local function retrieve_executor()
+	local name
+	if identifyexecutor then
+		name = identifyexecutor()
+	end
+	return { Name = name or "Unknown Executor" }
+end
+
+local function identify_executor()
+	local executorinfo = retrieve_executor()
+	return tostring(executorinfo.Name)
+end
+
+executor_string = identify_executor()
+
+function low_level_executor()
+	if executor_contains("solara") then return true end
+	if executor_contains("jjsploit") then return true end
+	if executor_contains("xeno") then return true end
+	return false
+end
+
+if not low_level_executor() then
+	task.spawn(function()
+		if getgenv().InitializedAdonisAdmin_Bypass then return end
+
+		if not getgenv().InitializedAdonisAdmin_Bypass then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
+			wait(0.1)
+			getgenv().InitializedAdonisAdmin_Bypass = true
+		end
+	end)
+end
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
 	if game.PlaceId == 7041939546 then

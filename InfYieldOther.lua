@@ -160,7 +160,7 @@ if makefolder and isfolder and writefile and isfile then
    end)
 end
 
-currentVersion = "7.7.3"
+currentVersion = "7.7.4"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -2115,12 +2115,12 @@ function chatMessage(str)
 	end
 end
 
-getgenv().get_vehicle = getgenv().get_vehicle or function()
+getgenv().get_vehicle_for_inf_premium = function()
 	local players = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
 	local workspaceRef = cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
 	local localPlayer = speaker or players.LocalPlayer
 	if not localPlayer then
-		notify("Error", "LocalPlayer not found? (issue?).")
+		notify("Issue", "LocalPlayer not found? (issue?).")
 		return nil
 	end
 	local folder_names = {
@@ -2184,67 +2184,67 @@ getgenv().get_vehicle = getgenv().get_vehicle or function()
 	return nil
 end
 
-getgenv().vehicle_fly = getgenv().vehicle_fly or false
-getgenv().vehicle_fly_speed = getgenv().vehicle_fly_speed or 3
-getgenv().vehiclefly_conns = getgenv().vehiclefly_conns or {}
-getgenv().vehiclefly_control = getgenv().vehiclefly_control or {f=0,b=0,l=0,r=0,q=0,e=0}
-getgenv().vehiclefly_noclip = getgenv().vehiclefly_noclip or false
-getgenv().vehiclefly_collisions = getgenv().vehiclefly_collisions or {}
+getgenv().vehicle_fly_inf_premium_ver = getgenv().vehicle_fly_inf_premium_ver or false
+getgenv().vehicle_fly_speed_infinite_premium = getgenv().vehicle_fly_speed_infinite_premium or 3
+getgenv().vehiclefly_conns_infinite_premium = getgenv().vehiclefly_conns_infinite_premium or {}
+getgenv().vehiclefly_control_inf_premium_tbl = getgenv().vehiclefly_control_inf_premium_tbl or {f=0,b=0,l=0,r=0,q=0,e=0}
+getgenv().vehiclefly_noclip_inf_premium_toggled = getgenv().vehiclefly_noclip_inf_premium_toggled or false
+getgenv().vehiclefly_collisions_tbl_infinite_premium = getgenv().vehiclefly_collisions_tbl_infinite_premium or {}
 local controlModule
 if UserInputService.TouchEnabled then
 	controlModule = require(
-		getgenv().LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
+		speaker:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
 	)
 end
 
-getgenv().cleanup = function()
-	for _, c in pairs(getgenv().vehiclefly_conns) do
+getgenv().cleanup_vehicle_fly_main_inf_premium = function()
+	for _, c in pairs(getgenv().vehiclefly_conns_infinite_premium) do
 		pcall(function() c:Disconnect() end)
 	end
-	getgenv().vehiclefly_conns = {}
+	getgenv().vehiclefly_conns_infinite_premium = {}
 
-	if getgenv().vehiclefly_bg then
-		getgenv().vehiclefly_bg:Destroy()
-		getgenv().vehiclefly_bg = nil
+	if getgenv().vehiclefly_bg_infinite_premium_instance then
+		getgenv().vehiclefly_bg_infinite_premium_instance:Destroy()
+		getgenv().vehiclefly_bg_infinite_premium_instance = nil
 	end
 
-	if getgenv().vehiclefly_bv then
-		getgenv().vehiclefly_bv:Destroy()
-		getgenv().vehiclefly_bv = nil
+	if getgenv().vehiclefly_bv_for_inf_premium then
+		getgenv().vehiclefly_bv_for_inf_premium:Destroy()
+		getgenv().vehiclefly_bv_for_inf_premium = nil
 	end
 end
 
-getgenv().enable_vehicle_noclip = function()
-	if getgenv().vehiclefly_noclip then return end
-	getgenv().vehiclefly_noclip = true
-	getgenv().vehiclefly_collisions = {}
-   local car = get_vehicle()
+getgenv().enable_vehicle_noclip_inf_yield_prem = function()
+	if getgenv().enable_vehicle_noclip_inf_yield_prem then return end
+	getgenv().enable_vehicle_noclip_inf_yield_prem = true
+	getgenv().vehiclefly_collisions_tbl_infinite_premium = {}
+   local car = getgenv().get_vehicle_for_inf_premiu()
 
 	for _, v in ipairs(car:GetDescendants()) do
 		if v:IsA("BasePart") then
-			getgenv().vehiclefly_collisions[v] = v.CanCollide
+			getgenv().vehiclefly_collisions_tbl_infinite_premium[v] = v.CanCollide
 			v.CanCollide = false
 		end
 	end
 end
 
-getgenv().disable_vehicle_noclip = function()
-	if not getgenv().vehiclefly_noclip then return end
-	getgenv().vehiclefly_noclip = false
+getgenv().disable_vehicle_noclip_inf_yield_prem = function()
+	if not getgenv().enable_vehicle_noclip_inf_yield_prem then return end
+	getgenv().enable_vehicle_noclip_inf_yield_prem = false
 
-	for part, state in pairs(getgenv().vehiclefly_collisions) do
+	for part, state in pairs(getgenv().vehiclefly_collisions_tbl_infinite_premium) do
 		if part and part.Parent then
 			part.CanCollide = state
 		end
 	end
-	getgenv().vehiclefly_collisions = {}
+	getgenv().vehiclefly_collisions_tbl_infinite_premium = {}
 end
 
-getgenv().start_vehicle_fly = function(model)
-	if getgenv().vehiclefly_bg or getgenv().vehiclefly_bv then return end
-   local car = get_vehicle() or speaker.Character:FindFirstChildWhichIsA("Humanoid").SeatPart
+getgenv().inf_yield_vehicle_fly_main = function(model)
+	if getgenv().vehiclefly_bg_infinite_premium_instance or getgenv().vehiclefly_bv_for_inf_premium then return end
+   local car = getgenv().get_vehicle_for_inf_premiu() or speaker.Character:FindFirstChildWhichIsA("Humanoid").SeatPart
 	if not car then
-		notify("Error", "Could not find a Vehicle, using default (IY) method.")
+		notify("Issue", "Could not find a Vehicle, using default (IY) method.")
 		return 
 	end
    local base = car.Base or car:FindFirstChild("Base")
@@ -2261,10 +2261,10 @@ getgenv().start_vehicle_fly = function(model)
 	bv.Velocity = Vector3.zero
 	bv.Parent = base
 
-	getgenv().vehiclefly_bg = bg
-	getgenv().vehiclefly_bv = bv
-	getgenv().vehiclefly_conns.render = RunService.RenderStepped:Connect(function()
-		if not getgenv().vehicle_fly then return end
+	getgenv().vehiclefly_bg_infinite_premium_instance = bg
+	getgenv().vehiclefly_bv_for_inf_premium = bv
+	getgenv().vehiclefly_conns_infinite_premium.render = RunService.RenderStepped:Connect(function()
+		if not getgenv().vehicle_fly_inf_premium_ver then return end
 
 		base.AssemblyAngularVelocity = Vector3.zero
 
@@ -2281,50 +2281,50 @@ getgenv().start_vehicle_fly = function(model)
 			forward = -mv.Z
 			right = mv.X
 		else
-			forward = getgenv().vehiclefly_control.f + getgenv().vehiclefly_control.b
-			right = getgenv().vehiclefly_control.l + getgenv().vehiclefly_control.r
-			up = getgenv().vehiclefly_control.q + getgenv().vehiclefly_control.e
+			forward = getgenv().vehiclefly_control_inf_premium_tbl.f + getgenv().vehiclefly_control_inf_premium_tbl.b
+			right = getgenv().vehiclefly_control_inf_premium_tbl.l + getgenv().vehiclefly_control_inf_premium_tbl.r
+			up = getgenv().vehiclefly_control_inf_premium_tbl.q + getgenv().vehiclefly_control_inf_premium_tbl.e
 		end
 
-		local target = (cam.CFrame.LookVector * forward + cam.CFrame.RightVector * right + Vector3.new(0, up, 0)) * (45 * getgenv().vehicle_fly_speed)
+		local target = (cam.CFrame.LookVector * forward + cam.CFrame.RightVector * right + Vector3.new(0, up, 0)) * (45 * getgenv().vehicle_fly_speed_infinite_premium)
 		bv.Velocity = bv.Velocity:Lerp(target, 0.25)
 	end)
 
 	if not is_mobile then
-		getgenv().vehiclefly_conns.down = UserInputService.InputBegan:Connect(function(i, g)
+		getgenv().vehiclefly_conns_infinite_premium.down = UserInputService.InputBegan:Connect(function(i, g)
 			if g then return end
-			if i.KeyCode == Enum.KeyCode.W then getgenv().vehiclefly_control.f = 1 end
-			if i.KeyCode == Enum.KeyCode.S then getgenv().vehiclefly_control.b = -1 end
-			if i.KeyCode == Enum.KeyCode.A then getgenv().vehiclefly_control.l = -1 end
-			if i.KeyCode == Enum.KeyCode.D then getgenv().vehiclefly_control.r = 1 end
-			if i.KeyCode == Enum.KeyCode.E then getgenv().vehiclefly_control.q = 1 end
-			if i.KeyCode == Enum.KeyCode.Q then getgenv().vehiclefly_control.e = -1 end
+			if i.KeyCode == Enum.KeyCode.W then getgenv().vehiclefly_control_inf_premium_tbl.f = 1 end
+			if i.KeyCode == Enum.KeyCode.S then getgenv().vehiclefly_control_inf_premium_tbl.b = -1 end
+			if i.KeyCode == Enum.KeyCode.A then getgenv().vehiclefly_control_inf_premium_tbl.l = -1 end
+			if i.KeyCode == Enum.KeyCode.D then getgenv().vehiclefly_control_inf_premium_tbl.r = 1 end
+			if i.KeyCode == Enum.KeyCode.E then getgenv().vehiclefly_control_inf_premium_tbl.q = 1 end
+			if i.KeyCode == Enum.KeyCode.Q then getgenv().vehiclefly_control_inf_premium_tbl.e = -1 end
 		end)
 
-		getgenv().vehiclefly_conns.up = UserInputService.InputEnded:Connect(function(i)
-			if i.KeyCode == Enum.KeyCode.W then getgenv().vehiclefly_control.f = 0 end
-			if i.KeyCode == Enum.KeyCode.S then getgenv().vehiclefly_control.b = 0 end
-			if i.KeyCode == Enum.KeyCode.A then getgenv().vehiclefly_control.l = 0 end
-			if i.KeyCode == Enum.KeyCode.D then getgenv().vehiclefly_control.r = 0 end
-			if i.KeyCode == Enum.KeyCode.E then getgenv().vehiclefly_control.q = 0 end
-			if i.KeyCode == Enum.KeyCode.Q then getgenv().vehiclefly_control.e = 0 end
+		getgenv().vehiclefly_conns_infinite_premium.up = UserInputService.InputEnded:Connect(function(i)
+			if i.KeyCode == Enum.KeyCode.W then getgenv().vehiclefly_control_inf_premium_tbl.f = 0 end
+			if i.KeyCode == Enum.KeyCode.S then getgenv().vehiclefly_control_inf_premium_tbl.b = 0 end
+			if i.KeyCode == Enum.KeyCode.A then getgenv().vehiclefly_control_inf_premium_tbl.l = 0 end
+			if i.KeyCode == Enum.KeyCode.D then getgenv().vehiclefly_control_inf_premium_tbl.r = 0 end
+			if i.KeyCode == Enum.KeyCode.E then getgenv().vehiclefly_control_inf_premium_tbl.q = 0 end
+			if i.KeyCode == Enum.KeyCode.Q then getgenv().vehiclefly_control_inf_premium_tbl.e = 0 end
 		end)
 	end
 end
 
-getgenv().stop_vehicle_fly = function()
-	getgenv().disable_vehicle_noclip()
-	cleanup()
-	getgenv().vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
+getgenv().stop_vehicle_fly_inf_yield_premium = function()
+	getgenv().disable_vehicle_noclip_inf_yield_prem()
+	cleanup_vehicle_fly_main_inf_premium()
+	getgenv().vehiclefly_control_inf_premium_tbl = {f=0,b=0,l=0,r=0,q=0,e=0}
 end
 
-getgenv().toggle_vehicle_fly = function()
-	getgenv().vehicle_fly = not getgenv().vehicle_fly
-	if getgenv().vehicle_fly then
-		getgenv().enable_vehicle_noclip()
-		getgenv().start_vehicle_fly()
+getgenv().toggle_vehicle_fly_inf_premium_version = function()
+	getgenv().vehicle_fly_inf_premium_ver = not getgenv().vehicle_fly_inf_premium_ver
+	if getgenv().vehicle_fly_inf_premium_ver then
+		getgenv().enable_vehicle_noclip_inf_yield_prem()
+		getgenv().inf_yield_vehicle_fly_main()
 	else
-		getgenv().stop_vehicle_fly()
+		getgenv().stop_vehicle_fly_inf_yield_premium()
 	end
 end
 
@@ -4951,6 +4951,7 @@ CMDs[#CMDs + 1] = {NAME = 'autojump / ajump', DESC = 'Automatically jumps when y
 CMDs[#CMDs + 1] = {NAME = 'unautojump / unajump', DESC = 'Disables autojump'}
 CMDs[#CMDs + 1] = {NAME = 'edgejump / ejump', DESC = 'Automatically jumps when you get to the edge of an object'}
 CMDs[#CMDs + 1] = {NAME = 'unedgejump / unejump', DESC = 'Disables edgejump'}
+CMDs[#CMDs + 1] = {NAME = 'setfps / setfpscap [number]', DESC = 'Sets your FPS cap to the specified value'}
 CMDs[#CMDs + 1] = {NAME = 'platformstand / stun', DESC = 'Enables PlatformStand'}
 CMDs[#CMDs + 1] = {NAME = 'unplatformstand / unstun', DESC = 'Disables PlatformStand'}
 CMDs[#CMDs + 1] = {NAME = 'norotate / noautorotate', DESC = 'Disables AutoRotate'}
@@ -6724,6 +6725,21 @@ addcmd('clraliases',{},function(args, speaker)
 	refreshaliases()
 end)
 
+addcmd('setfps',{'setfpscap','makefps'}, function(args, speaker)
+	local input = args[1] or 999999
+	local set_fps = setfpscap or setfps or set_fps or set_fps_cap
+
+	if set_fps then
+		if isNumber(input) then
+			if setfpscap or setfps or set_fps or set_fps_cap then
+				set_fps(input)
+			end
+		end
+	else
+		notify('Issue', 'Your exploit does not support this command (missing setfpscap)')
+	end
+end)
+
 addcmd('keepiy', {}, function(args, speaker)
 	if queueteleport then
 		KeepInfYield = true
@@ -7394,8 +7410,8 @@ end)
 
 addcmd('vfly', {'vehiclefly'}, function(args, speaker)
 	local vehicle
-	if typeof(getgenv().get_vehicle) == "function" then
-		local ok, result = pcall(getgenv().get_vehicle, speaker)
+	if typeof(getgenv().getgenv().get_vehicle_for_inf_premiu) == "function" then
+		local ok, result = pcall(getgenv().getgenv().get_vehicle_for_inf_premiu, speaker)
 		if ok then
 			vehicle = result
 		end
@@ -7414,7 +7430,7 @@ addcmd('vfly', {'vehiclefly'}, function(args, speaker)
 	end
 
 	if args[1] and isNumber(args[1]) then
-		getgenv().vehicle_fly_speed = tonumber(args[1])
+		getgenv().vehicle_fly_speed_infinite_premium = tonumber(args[1])
 	end
 end)
 
@@ -10173,11 +10189,7 @@ end)
 
 addcmd("emotegui", {"allemotes"}, function(args, speaker)
 	if getgenv().FreeEmotes_Enabled then
-		if getgenv().notify then
-			return getgenv().notify("Warning", "You already have Free Emotes GUI loaded!", 5)
-		else
-			return 
-		end
+		return 
 	end
 
 	getgenv().FreeEmotes_Enabled = true
@@ -12631,38 +12643,38 @@ getStaffRole = function(player)
 end
 
 addcmd("staffwatch", {}, function(args, speaker)
-    if staffwatchjoin then
-        staffwatchjoin:Disconnect()
-    end
-    if game.CreatorType == Enum.CreatorType.Group then
-        local found = {}
-        staffwatchjoin = Players.PlayerAdded:Connect(function(player)
-            local result = getStaffRole(player)
-            if result.Staff then
-                notify("Staffwatch", formatUsername(player) .. " is a " .. result.Role)
-            end
-        end)
-        for _, player in pairs(Players:GetPlayers()) do
-            local result = getStaffRole(player)
-            if result.Staff then
-                table.insert(found, formatUsername(player) .. " is a " .. result.Role)
-            end
-        end
-        if #found > 0 then
-            notify("Staffwatch", table.concat(found, ",\n"))
-        else
-            notify("Staffwatch", "Enabled")
-        end
-    else
-        notify("Staffwatch", "Game is not owned by a Group")
-    end
+	if staffwatchjoin then
+		staffwatchjoin:Disconnect()
+	end
+	if game.CreatorType == Enum.CreatorType.Group then
+		local found = {}
+		staffwatchjoin = Players.PlayerAdded:Connect(function(player)
+			local result = getStaffRole(player)
+			if result.Staff then
+				notify("Staffwatch", formatUsername(player) .. " is a " .. result.Role)
+			end
+		end)
+		for _, player in pairs(Players:GetPlayers()) do
+			local result = getStaffRole(player)
+			if result.Staff then
+				table.insert(found, formatUsername(player) .. " is a " .. result.Role)
+			end
+		end
+		if #found > 0 then
+			notify("Staffwatch", table.concat(found, ",\n"))
+		else
+			notify("Staffwatch", "Enabled")
+		end
+	else
+		notify("Staffwatch", "Game is not owned by a Group")
+	end
 end)
 
 addcmd("unstaffwatch", {}, function(args, speaker)
-    if staffwatchjoin then
-        staffwatchjoin:Disconnect()
-    end
-    notify("Staffwatch", "Disabled")
+	if staffwatchjoin then
+		staffwatchjoin:Disconnect()
+	end
+	notify("Staffwatch", "Disabled")
 end)
 
 addcmd('removeterrain',{'rterrain','noterrain'},function(args, speaker)
@@ -12688,274 +12700,271 @@ end)
 
 OrgDestroyHeight = workspace.FallenPartsDestroyHeight
 addcmd("antivoid", {}, function(args, speaker)
-    execCmd("unantivoid nonotify")
-    task.wait()
-    antivoidloop = RunService.Stepped:Connect(function()
-        local root = getRoot(speaker.Character)
-        if root and root.Position.Y <= OrgDestroyHeight + 25 then
-            root.Velocity = root.Velocity + Vector3.new(0, 250, 0)
-        end
-    end)
-    if args[1] ~= "nonotify" then notify("antivoid", "Enabled") end
+   execCmd("unantivoid nonotify")
+	task.wait()
+	antivoidloop = RunService.Stepped:Connect(function()
+		local root = getRoot(speaker.Character)
+		if root and root.Position.Y <= OrgDestroyHeight + 25 then
+			root.Velocity = root.Velocity + Vector3.new(0, 250, 0)
+		end
+	end)
+	if args[1] ~= "nonotify" then notify("antivoid", "Enabled") end
 end)
 
 addcmd("unantivoid", {"noantivoid"}, function(args, speaker)
-    pcall(function() antivoidloop:Disconnect() end)
-    antivoidloop = nil
-    if args[1] ~= "nonotify" then notify("antivoid", "Disabled") end
+	pcall(function() antivoidloop:Disconnect() end)
+	antivoidloop = nil
+	if args[1] ~= "nonotify" then notify("antivoid", "Disabled") end
 end)
 
 antivoidWasEnabled = false
 addcmd("fakeout", {}, function(args, speaker)
-    local root = getRoot(speaker.Character)
-    local oldpos = root.CFrame
-    if antivoidloop then
-        execCmd("unantivoid nonotify")
-        antivoidWasEnabled = true
-    end
-    workspace.FallenPartsDestroyHeight = 0/1/0
-    root.CFrame = CFrame.new(Vector3.new(0, OrgDestroyHeight - 25, 0))
-    task.wait(1)
-    root.CFrame = oldpos
-    workspace.FallenPartsDestroyHeight = OrgDestroyHeight
-    if antivoidWasEnabled then
-        execCmd("antivoid nonotify")
-        antivoidWasEnabled = false
-    end
+	local root = getRoot(speaker.Character)
+	local oldpos = root.CFrame
+	if antivoidloop then
+		execCmd("unantivoid nonotify")
+		antivoidWasEnabled = true
+	end
+	workspace.FallenPartsDestroyHeight = 0/1/0
+	root.CFrame = CFrame.new(Vector3.new(0, OrgDestroyHeight - 25, 0))
+	task.wait(1)
+	root.CFrame = oldpos
+	workspace.FallenPartsDestroyHeight = OrgDestroyHeight
+	if antivoidWasEnabled then
+		execCmd("antivoid nonotify")
+		antivoidWasEnabled = false
+	end
 end)
 
 addcmd("trip", {}, function(args, speaker)
-    local humanoid = speaker.Character and speaker.Character:FindFirstChildWhichIsA("Humanoid")
-    local root = speaker.Character and getRoot(speaker.Character)
-    if humanoid and root then
-        humanoid:ChangeState(Enum.HumanoidStateType.FallingDown)
-        root.Velocity = root.CFrame.LookVector * 30
-    end
+	local humanoid = speaker.Character and speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	local root = speaker.Character and getRoot(speaker.Character)
+	if humanoid and root then
+		humanoid:ChangeState(Enum.HumanoidStateType.FallingDown)
+		root.Velocity = root.CFrame.LookVector * 30
+	end
 end)
 
 addcmd("removeads", {"adblock"}, function(args, speaker)
-    while wait() do
-        pcall(function()
-            for i, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("PackageLink") then
-                    if v.Parent:FindFirstChild("ADpart") then
-                        v.Parent:Destroy()
-                    end
-                    if v.Parent:FindFirstChild("AdGuiAdornee") then
-                        v.Parent.Parent:Destroy()
-                    end
-                end
-            end
-        end)
-    end
+	while wait() do
+		pcall(function()
+			for i, v in pairs(workspace:GetDescendants()) do
+				if v:IsA("PackageLink") then
+					if v.Parent:FindFirstChild("ADpart") then
+						v.Parent:Destroy()
+					end
+					if v.Parent:FindFirstChild("AdGuiAdornee") then
+						v.Parent.Parent:Destroy()
+					end
+				end
+			end
+		end)
+	end
 end)
 
 addcmd("scare", {"spook"}, function(args, speaker)
-    local players = getPlayer(args[1], speaker)
-    local oldpos = nil
+	local players = getPlayer(args[1], speaker)
+	local oldpos = nil
 
-    for _, v in pairs(players) do
-        local root = speaker.Character and getRoot(speaker.Character)
-        local target = Players[v]
-        local targetRoot = target and target.Character and getRoot(target.Character)
+	for _, v in pairs(players) do
+		local root = speaker.Character and getRoot(speaker.Character)
+		local target = Players[v]
+		local targetRoot = target and target.Character and getRoot(target.Character)
 
-        if root and targetRoot and target ~= speaker then
-            oldpos = root.CFrame
-            root.CFrame = targetRoot.CFrame + targetRoot.CFrame.lookVector * 2
-            root.CFrame = CFrame.new(root.Position, targetRoot.Position)
-            task.wait(0.5)
-            root.CFrame = oldpos
-        end
-    end
+		if root and targetRoot and target ~= speaker then
+			oldpos = root.CFrame
+			root.CFrame = targetRoot.CFrame + targetRoot.CFrame.lookVector * 2
+			root.CFrame = CFrame.new(root.Position, targetRoot.Position)
+			task.wait(0.5)
+			root.CFrame = oldpos
+		end
+	end
 end)
 
 addcmd("alignmentkeys", {}, function(args, speaker)
-    alignmentKeys = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.Comma then workspace.CurrentCamera:PanUnits(-1) end
-        if input.KeyCode == Enum.KeyCode.Period then workspace.CurrentCamera:PanUnits(1) end
-    end)
-    alignmentKeysEmotes = StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu)
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
+	alignmentKeys = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if input.KeyCode == Enum.KeyCode.Comma then workspace.CurrentCamera:PanUnits(-1) end
+		if input.KeyCode == Enum.KeyCode.Period then workspace.CurrentCamera:PanUnits(1) end
+	end)
+	alignmentKeysEmotes = StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu)
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
 end)
 
 addcmd("unalignmentkeys", {"noalignmentkeys"}, function(args, speaker)
-    if type(alignmentKeysEmotes) == "boolean" then
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, alignmentKeysEmotes)
-    end
-    alignmentKeys:Disconnect()
+	if type(alignmentKeysEmotes) == "boolean" then
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, alignmentKeysEmotes)
+	end
+	alignmentKeys:Disconnect()
 end)
 
 addcmd("ctrllock", {}, function(args, speaker)
-    local mouseLockController = speaker.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
-    local boundKeys = mouseLockController:FindFirstChild("BoundKeys")
+	local mouseLockController = speaker.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
+	local boundKeys = mouseLockController:FindFirstChild("BoundKeys")
 
-    if boundKeys then
-        boundKeys.Value = "LeftControl"
-    else
-        boundKeys = Instance.new("StringValue")
-        boundKeys.Name = "BoundKeys"
-        boundKeys.Value = "LeftControl"
-        boundKeys.Parent = mouseLockController
-    end
+	if boundKeys then
+		boundKeys.Value = "LeftControl"
+	else
+		boundKeys = Instance.new("StringValue")
+		boundKeys.Name = "BoundKeys"
+		boundKeys.Value = "LeftControl"
+		boundKeys.Parent = mouseLockController
+	end
 end)
 
 addcmd("unctrllock", {}, function(args, speaker)
-    local mouseLockController = speaker.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
-    local boundKeys = mouseLockController:FindFirstChild("BoundKeys")
+	local mouseLockController = speaker.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
+	local boundKeys = mouseLockController:FindFirstChild("BoundKeys")
 
-    if boundKeys then
-        boundKeys.Value = "LeftShift"
-    else
-        boundKeys = Instance.new("StringValue")
-        boundKeys.Name = "BoundKeys"
-        boundKeys.Value = "LeftShift"
-        boundKeys.Parent = mouseLockController
-    end
+	if boundKeys then
+		boundKeys.Value = "LeftShift"
+	else
+		boundKeys = Instance.new("StringValue")
+		boundKeys.Name = "BoundKeys"
+		boundKeys.Value = "LeftShift"
+		boundKeys.Parent = mouseLockController
+	end
 end)
 
 addcmd("listento", {}, function(args, speaker)
-    execCmd("unlistento")
-    if not args[1] then return end
+	execCmd("unlistento")
+	if not args[1] then return end
 
-    local player = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
-    local root = player and player.Character and getRoot(player.Character)
+	local player = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
+	local root = player and player.Character and getRoot(player.Character)
 
-    if root then
-        SoundService:SetListener(Enum.ListenerType.ObjectPosition, root)
-        listentoChar = player.CharacterAdded:Connect(function()
-            repeat task.wait() until Players[player.Name].Character ~= nil and getRoot(Players[player.Name].Character)
-            SoundService:SetListener(Enum.ListenerType.ObjectPosition, getRoot(Players[player.Name].Character))
-        end)
-    end
+	if root then
+		SoundService:SetListener(Enum.ListenerType.ObjectPosition, root)
+		listentoChar = player.CharacterAdded:Connect(function()
+			repeat task.wait() until Players[player.Name].Character ~= nil and getRoot(Players[player.Name].Character)
+			SoundService:SetListener(Enum.ListenerType.ObjectPosition, getRoot(Players[player.Name].Character))
+		end)
+	end
 end)
 
 addcmd("unlistento", {}, function(args, speaker)
-    SoundService:SetListener(Enum.ListenerType.Camera)
-    listentoChar:Disconnect()
+	SoundService:SetListener(Enum.ListenerType.Camera)
+	listentoChar:Disconnect()
 end)
 
 addcmd("jerk", {}, function(args, speaker)
-    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-    local backpack = speaker:FindFirstChildWhichIsA("Backpack")
-    if not humanoid or not backpack then return end
+	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	local backpack = speaker:FindFirstChildWhichIsA("Backpack")
+	if not humanoid or not backpack then return end
 
-    local tool = Instance.new("Tool")
-    tool.Name = "Jerk Off"
-    tool.ToolTip = "in the stripped club. straight up \"jorking it\" . and by \"it\" , haha, well. let's justr say. My peanits."
-    tool.RequiresHandle = false
-    tool.Parent = backpack
+	local tool = Instance.new("Tool")
+	tool.Name = "Jerk Off"
+	tool.ToolTip = "in the stripped club. straight up \"jorking it\" . and by \"it\" , haha, well. let's justr say. My peanits."
+	tool.RequiresHandle = false
+	tool.Parent = backpack
 
-    local jorkin = false
-    local track = nil
+	local jorkin = false
+	local track = nil
 
-    local function stopTomfoolery()
-        jorkin = false
-        if track then
-            track:Stop()
-            track = nil
-        end
-    end
+	local function stopTomfoolery()
+		jorkin = false
+		if track then
+			track:Stop()
+			track = nil
+		end
+	end
 
-    tool.Equipped:Connect(function() jorkin = true end)
-    tool.Unequipped:Connect(stopTomfoolery)
-    humanoid.Died:Connect(stopTomfoolery)
+	tool.Equipped:Connect(function() jorkin = true end)
+	tool.Unequipped:Connect(stopTomfoolery)
+	humanoid.Died:Connect(stopTomfoolery)
 
-    while task.wait() do
-        if not jorkin then continue end
+	while task.wait() do
+		if not jorkin then continue end
 
-        local isR15 = r15(speaker)
-        if not track then
-            local anim = Instance.new("Animation")
-            anim.AnimationId = not isR15 and "rbxassetid://72042024" or "rbxassetid://698251653"
-            track = humanoid:LoadAnimation(anim)
-        end
+		local isR15 = r15(speaker)
+		if not track then
+			local anim = Instance.new("Animation")
+			anim.AnimationId = not isR15 and "rbxassetid://72042024" or "rbxassetid://698251653"
+			track = humanoid:LoadAnimation(anim)
+		end
 
-        track:Play()
-        track:AdjustSpeed(isR15 and 0.7 or 0.65)
-        track.TimePosition = 0.6
-        task.wait(0.1)
-        while track and track.TimePosition < (not isR15 and 0.65 or 0.7) do task.wait(0.1) end
-        if track then
-            track:Stop()
-            track = nil
-        end
-    end
+		track:Play()
+		track:AdjustSpeed(isR15 and 0.7 or 0.65)
+		track.TimePosition = 0.6
+		task.wait(0.1)
+		while track and track.TimePosition < (not isR15 and 0.65 or 0.7) do task.wait(0.1) end
+		if track then
+			track:Stop()
+			track = nil
+		end
+	end
 end)
 
 addcmd("guiscale", {}, function(args, speaker)
-    if args[1] and isNumber(args[1]) then
-        local scale = tonumber(args[1])
-        if scale % 1 == 0 then scale = scale / 100 end
-        -- me when i divide and it explodes
-        if scale == 0.01 then scale = 1 end
-        if scale == 0.02 then scale = 2 end
+	if args[1] and isNumber(args[1]) then
+		local scale = tonumber(args[1])
+		if scale % 1 == 0 then scale = scale / 100 end
+		-- me when i divide and it explodes
+		if scale == 0.01 then scale = 1 end
+		if scale == 0.02 then scale = 2 end
+		if scale >= 0.4 and scale <= 2 then guiScale = scale end
+	else
+		guiScale = defaultGuiScale
+	end
 
-        if scale >= 0.4 and scale <= 2 then
-            guiScale = scale
-        end
-    else
-        guiScale = defaultGuiScale
-    end
-
-    Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale)
-    updatesaves()
+	Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale)
+	updatesaves()
 end)
 
 addcmd("unsuspendchat", {}, function(args, speaker)
 	if replicatesignal then
-        replicatesignal(TextChatService.UpdateChatTimeout, speaker.UserId, 0, 10)
-    else
-        notify("Incompatible Exploit", "Your exploit does not support this command (missing replicatesignal)")
-    end
+		replicatesignal(TextChatService.UpdateChatTimeout, speaker.UserId, 0, 10)
+	else
+		notify("Incompatible Exploit", "Your exploit does not support this command (missing replicatesignal)")
+	end
 end)
 
 addcmd("unsuspendvc", {}, function(args, speaker)
 	if replicatesignal then
-    	replicatesignal(VoiceChatService.ClientRetryJoin)
+		replicatesignal(VoiceChatService.ClientRetryJoin)
 
-    	if typeof(onVoiceModerated) ~= "RBXScriptConnection" then
-        	onVoiceModerated = Services.VoiceChatInternal.LocalPlayerModerated:Connect(function()
-            	task.wait(1)
-            	replicatesignal(VoiceChatService.ClientRetryJoin)
-        	end)
-    	end
-    else
-        notify("Incompatible Exploit", "Your exploit does not support this command (missing replicatesignal)")
-    end
+		if typeof(onVoiceModerated) ~= "RBXScriptConnection" then
+			onVoiceModerated = Services.VoiceChatInternal.LocalPlayerModerated:Connect(function()
+				task.wait(1)
+				replicatesignal(VoiceChatService.ClientRetryJoin)
+			end)
+		end
+	else
+		notify("Incompatible Exploit", "Your exploit does not support this command (missing replicatesignal)")
+	end
 end)
 
 addcmd("muteallvcs", {}, function(args, speaker)
-    Services.VoiceChatInternal:SubscribePauseAll(true)
+	Services.VoiceChatInternal:SubscribePauseAll(true)
 end)
 
 addcmd("unmuteallvcs", {}, function(args, speaker)
-    Services.VoiceChatInternal:SubscribePauseAll(false)
+	Services.VoiceChatInternal:SubscribePauseAll(false)
 end)
 
 addcmd("mutevc", {}, function(args, speaker)
-    for _, plr in getPlayer(args[1], speaker) do
-        if Players[plr] == speaker then continue end
-        Services.VoiceChatInternal:SubscribePause(Players[plr].UserId, true)
-    end
+	for _, plr in getPlayer(args[1], speaker) do
+		if Players[plr] == speaker then continue end
+		Services.VoiceChatInternal:SubscribePause(Players[plr].UserId, true)
+	end
 end)
 
 addcmd("unmutevc", {}, function(args, speaker)
-    for _, plr in getPlayer(args[1], speaker) do
-        if Players[plr] == speaker then continue end
-        Services.VoiceChatInternal:SubscribePause(Players[plr].UserId, false)
-    end
+	for _, plr in getPlayer(args[1], speaker) do
+		if Players[plr] == speaker then continue end
+		Services.VoiceChatInternal:SubscribePause(Players[plr].UserId, false)
+	end
 end)
 
 addcmd("phonebook", {"call"}, function(args, speaker)
-    local success, canInvite = pcall(function()
-        return SocialService:CanSendCallInviteAsync(speaker)
-    end)
-    if success and canInvite then
-        SocialService:PromptPhoneBook(speaker, "")
-    else
-        notify("Phonebook", "It seems you're not able to call anyone. Sorry!")
-    end
+	local success, canInvite = pcall(function()
+		return SocialService:CanSendCallInviteAsync(speaker)
+	end)
+	if success and canInvite then
+		SocialService:PromptPhoneBook(speaker, "")
+	else
+		notify("Phonebook", "It seems you're not able to call anyone. Sorry!")
+	end
 end)
 
 addcmd("permadeath", {}, function(args, speaker)

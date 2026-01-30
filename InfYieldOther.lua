@@ -2193,7 +2193,7 @@ getgenv().vehiclefly_collisions_tbl_infinite_premium = getgenv().vehiclefly_coll
 local controlModule
 if UserInputService.TouchEnabled then
 	controlModule = require(
-		speaker:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
+		game.Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
 	)
 end
 

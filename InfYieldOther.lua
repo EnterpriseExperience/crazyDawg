@@ -12021,66 +12021,66 @@ addcmd('togglefling',{},function(args, speaker)
 end)
 
 addcmd("flyfling", {}, function(args, speaker)
-    execCmd("unvehiclefly\\unwalkfling")
-    task.wait()
-    vehicleflyspeed = tonumber(args[1]) or vehicleflyspeed
-    execCmd("vehiclefly\\walkfling")
+	execCmd("unvehiclefly\\unwalkfling")
+	task.wait()
+	vehicleflyspeed = tonumber(args[1]) or vehicleflyspeed
+	execCmd("vehiclefly\\walkfling")
 end)
 
 addcmd("unflyfling", {}, function(args, speaker)
-    execCmd("unvehiclefly\\unwalkfling\\breakvelocity")
+   execCmd("unvehiclefly\\unwalkfling\\breakvelocity")
 end)
 
 addcmd("toggleflyfling", {}, function(args, speaker)
-    execCmd(flinging and "unflyfling" or "flyfling")
+   execCmd(flinging and "unflyfling" or "flyfling")
 end)
 
 walkflinging = false
 addcmd("walkfling", {}, function(args, speaker)
-    execCmd("unwalkfling")
-    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-    if humanoid then
-        humanoid.Died:Connect(function()
-            execCmd("unwalkfling")
-        end)
-    end
+   execCmd("unwalkfling")
+	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	if humanoid then
+		humanoid.Died:Connect(function()
+			execCmd("unwalkfling")
+		end)
+	end
 
-    execCmd("noclip nonotify")
-    walkflinging = true
-    repeat RunService.Heartbeat:Wait()
-        local character = speaker.Character
-        local root = getRoot(character)
-        local vel, movel = nil, 0.1
+	execCmd("noclip nonotify")
+	walkflinging = true
+	repeat RunService.Heartbeat:Wait()
+		local character = speaker.Character
+		local root = getRoot(character)
+		local vel, movel = nil, 0.1
 
-        while not (character and character.Parent and root and root.Parent) do
-            RunService.Heartbeat:Wait()
-            character = speaker.Character
-            root = getRoot(character)
-        end
+		while not (character and character.Parent and root and root.Parent) do
+			RunService.Heartbeat:Wait()
+			character = speaker.Character
+			root = getRoot(character)
+		end
 
-        vel = root.Velocity
-        root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+		vel = root.Velocity
+		root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
 
-        RunService.RenderStepped:Wait()
-        if character and character.Parent and root and root.Parent then
-            root.Velocity = vel
-        end
+		RunService.RenderStepped:Wait()
+		if character and character.Parent and root and root.Parent then
+			root.Velocity = vel
+		end
 
-        RunService.Stepped:Wait()
-        if character and character.Parent and root and root.Parent then
-            root.Velocity = vel + Vector3.new(0, movel, 0)
-            movel = movel * -1
-        end
-    until walkflinging == false
+		RunService.Stepped:Wait()
+		if character and character.Parent and root and root.Parent then
+			root.Velocity = vel + Vector3.new(0, movel, 0)
+			movel = movel * -1
+		end
+	until walkflinging == false
 end)
 
 addcmd("unwalkfling", {"nowalkfling"}, function(args, speaker)
-    walkflinging = false
-    execCmd("unnoclip nonotify")
+	walkflinging = false
+	execCmd("unnoclip nonotify")
 end)
 
 addcmd("togglewalkfling", {}, function(args, speaker)
-    execCmd(walkflinging and "unwalkfling" or "walkfling")
+   execCmd(walkflinging and "unwalkfling" or "walkfling")
 end)
 
 addcmd('invisfling',{},function(args, speaker)
@@ -12137,6 +12137,7 @@ addcmd("antifling", {}, function(args, speaker)
 		antifling:Disconnect()
 		antifling = nil
 	end
+	notify("Anti-Fling", "Anti Fling: Enabled")
 	antifling = RunService.Stepped:Connect(function()
 		for _, player in pairs(Players:GetPlayers()) do
 			if player ~= speaker and player.Character then
@@ -12155,6 +12156,7 @@ addcmd("unantifling", {}, function(args, speaker)
 		antifling:Disconnect()
 		antifling = nil
 	end
+	notify("Anti-Fling", "Anti Fling: Disabled")
 end)
 
 addcmd("toggleantifling", {}, function(args, speaker)
@@ -12564,7 +12566,9 @@ addcmd('stareat',{'stare'},function(args, speaker)
 				local newCF=CFrame.new(chrPos,modTPos)
 				Players.LocalPlayer.Character:SetPrimaryPartCFrame(newCF)
 			elseif not Players:FindFirstChild(v) then
-				stareLoop:Disconnect()
+				if stareLoop then
+					stareLoop:Disconnect()
+				end
 			end
 		end
 

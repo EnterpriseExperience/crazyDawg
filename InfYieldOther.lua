@@ -12137,7 +12137,7 @@ addcmd("antifling", {}, function(args, speaker)
 		antifling:Disconnect()
 		antifling = nil
 	end
-	notify("Anti-Fling", "Anti Fling: Enabled")
+	Notify_InfP("Anti-Fling", "Anti Fling: Enabled")
 	antifling = RunService.Stepped:Connect(function()
 		for _, player in pairs(Players:GetPlayers()) do
 			if player ~= speaker and player.Character then
@@ -12156,7 +12156,7 @@ addcmd("unantifling", {}, function(args, speaker)
 		antifling:Disconnect()
 		antifling = nil
 	end
-	notify("Anti-Fling", "Anti Fling: Disabled")
+	Notify_InfP("Anti-Fling", "Anti Fling: Disabled")
 end)
 
 addcmd("toggleantifling", {}, function(args, speaker)

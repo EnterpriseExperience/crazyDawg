@@ -160,7 +160,7 @@ if makefolder and isfolder and writefile and isfile then
    end)
 end
 
-currentVersion = "7.7.4"
+currentVersion = "7.7.6"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -333,6 +333,96 @@ shade3 = {}
 text1 = {}
 text2 = {}
 scroll = {}
+getgenv().FlamesLibrary = getgenv().FlamesLibrary or {}
+getgenv().FlamesLibrary._connections = getgenv().FlamesLibrary._connections or {}
+getgenv().FlamesLibrary.connect = function(name, connection)
+	getgenv().FlamesLibrary._connections[name] = getgenv().FlamesLibrary._connections[name] or {}
+	table.insert(getgenv().FlamesLibrary._connections[name], connection)
+	return connection
+end
+
+getgenv().FlamesLibrary.disconnect = function(name)
+	local list = getgenv().FlamesLibrary._connections[name]
+
+	if list then
+		for _, item in ipairs(list) do
+			if typeof(item) == "RBXScriptConnection" then
+				item:Disconnect()
+			elseif type(item) == "thread" then
+				pcall(task.cancel, item)
+			end
+		end
+		getgenv().FlamesLibrary._connections[name] = nil
+	end
+end
+
+getgenv().FlamesLibrary.spawn = function(name, mode, func, ...)
+	getgenv().FlamesLibrary._connections[name] = getgenv().FlamesLibrary._connections[name] or {}
+
+	local thread
+
+	if mode == "spawn" then
+		thread = task.spawn(func, ...)
+	elseif mode == "defer" then
+		thread = task.defer(func, ...)
+	elseif mode == "delay" then
+		local delay_time = ...
+		thread = task.delay(delay_time, func)
+	elseif mode == "wrap" then
+		thread = coroutine.create(func)
+		coroutine.resume(thread, ...)
+	else
+      -- don't really need a warning but what ever --
+		-- warn("Invalid spawn mode / argument: "..tostring(mode))
+		return
+	end
+
+	table.insert(getgenv().FlamesLibrary._connections[name], thread)
+	return thread
+end
+
+getgenv().FlamesLibrary.is_thread_alive = function(thread)
+	if type(thread) ~= "thread" then
+		return false
+	end
+
+	local success, status = pcall(coroutine.status, thread)
+	if not success then
+		return false
+	end
+
+	return status ~= "dead"
+end
+
+getgenv().FlamesLibrary.is_alive = function(name)
+	local list = getgenv().FlamesLibrary._connections[name]
+
+	if not list then
+		return false
+	end
+
+	for _, item in ipairs(list) do
+		if type(item) == "thread" then
+			if getgenv().FlamesLibrary.is_thread_alive(item) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+getgenv().FlamesLibrary.cleanup_all = function()
+	for name in pairs(getgenv().FlamesLibrary._connections) do
+		getgenv().FlamesLibrary.disconnect(name)
+	end
+end
+
+if not getgenv().GlobalEnvironmentFramework_Initialized then
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/GlobalEnv_Framework.lua"))()
+	task.wait(0.1)
+	getgenv().GlobalEnvironmentFramework_Initialized = true
+end
 
 ScaledHolder.Name = randomString()
 ScaledHolder.Size = UDim2.fromScale(1, 1)
@@ -386,6 +476,78 @@ do
 	if emoji then
 		Title.Text = ("%s %s %s"):format(emoji, Title.Text, emoji)
 	end
+end
+
+getgenv().hasProp = getgenv().hasProp or function(inst, prop)
+   return inst and isProperty(inst, prop) ~= nil
+end
+
+getgenv().setProperty = getgenv().setProperty or function(inst, prop, v)
+	local s, _ = pcall(function() inst[prop] = v end)
+	return s
+end
+
+getgenv().safeSet = getgenv().safeSet or function(inst, prop, val)
+   if inst and hasProp(inst, prop) then setProperty(inst, prop, val) end
+end
+
+getgenv().anti_sit_enabled = getgenv().anti_sit_enabled or false
+
+local local_player = getgenv().LocalPlayer or Players.LocalPlayer
+local tag_name = "anti_sit_system"
+local function hook_character(character)
+   if not character or not character:FindFirstChild("HumanoidRootPart") then character:WaitForChild("HumanoidRootPart") end
+   local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
+   local seated_connection
+   seated_connection = humanoid.Seated:Connect(function(active)
+      if not getgenv().anti_sit_enabled then
+         return 
+      end
+
+      if active then
+         task.wait()
+         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+         humanoid.Sit = false
+      end
+   end)
+
+   getgenv().FlamesLibrary.connect(tag_name, seated_connection)
+end
+
+local function start_anti_sit()
+   if getgenv().FlamesLibrary.is_alive(tag_name) then
+      return getgenv().notify("Warning", "Anti-Sit is already running!", 6)
+   end
+
+   if local_player.Character then
+      hook_character(local_player.Character)
+   end
+
+   local char_connection = local_player.CharacterAdded:Connect(function(character)
+      hook_character(character)
+   end)
+
+   getgenv().notify("Success", "Flames Anti-Sit is now enabled.", 5)
+   getgenv().FlamesLibrary.connect(tag_name, char_connection)
+end
+
+local function stop_anti_sit()
+   if not getgenv().FlamesLibrary.is_alive(tag_name) then
+      return getgenv().notify("Warning", "Anti-Sit is not enabled.", 5)
+   end
+
+   getgenv().FlamesLibrary.disconnect(tag_name)
+   getgenv().notify("Success", "Flames Anti-Sit is now disabled.", 5)
+end
+
+getgenv().toggle_anti_sit = function(state)
+   getgenv().anti_sit_enabled = state
+
+   if state then
+      start_anti_sit()
+   else
+      stop_anti_sit()
+   end
 end
 
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -4940,7 +5102,7 @@ CMDs[#CMDs + 1] = {NAME = 'gravity / grav [num] (CLIENT)', DESC = 'Change your g
 CMDs[#CMDs + 1] = {NAME = 'sit', DESC = 'Makes your character sit'}
 CMDs[#CMDs + 1] = {NAME = 'lay / laydown', DESC = 'Makes your character lay down'}
 CMDs[#CMDs + 1] = {NAME = 'sitwalk', DESC = 'Makes your character sit while still being able to walk'}
-CMDs[#CMDs + 1] = {NAME = 'nosit', DESC = 'Prevents your character from sitting'}
+CMDs[#CMDs + 1] = {NAME = 'nosit / antisit', DESC = 'Prevents your character from sitting'}
 CMDs[#CMDs + 1] = {NAME = 'unnosit', DESC = 'Disables nosit'}
 CMDs[#CMDs + 1] = {NAME = 'jump', DESC = 'Makes your character jump'}
 CMDs[#CMDs + 1] = {NAME = 'infinitejump / infjump', DESC = 'Allows you to jump before hitting the ground'}
@@ -9957,12 +10119,81 @@ addcmd("sitwalk", {}, function(args, speaker)
 	speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
-addcmd("nosit", {}, function(args, speaker)
-    speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+getgenv().hasProp = getgenv().hasProp or function(inst, prop)
+   return inst and isProperty(inst, prop) ~= nil
+end
+
+getgenv().setProperty = getgenv().setProperty or function(inst, prop, v)
+	local s, _ = pcall(function() inst[prop] = v end)
+	return s
+end
+
+getgenv().safeSet = getgenv().safeSet or function(inst, prop, val)
+   if inst and hasProp(inst, prop) then setProperty(inst, prop, val) end
+end
+
+getgenv().anti_sit_enabled = getgenv().anti_sit_enabled or false
+local local_player = getgenv().LocalPlayer or Players.LocalPlayer
+local tag_name = "anti_sit_system"
+local function hook_character(character)
+   if not character or not character:FindFirstChild("HumanoidRootPart") then character:WaitForChild("HumanoidRootPart") end
+   local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
+   local seated_connection
+   seated_connection = humanoid.Seated:Connect(function(active)
+      if not getgenv().anti_sit_enabled then
+         return 
+      end
+
+      if active then
+         task.wait()
+         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+         humanoid.Sit = false
+      end
+   end)
+
+   getgenv().FlamesLibrary.connect(tag_name, seated_connection)
+end
+
+local function start_anti_sit()
+   if getgenv().FlamesLibrary.is_alive(tag_name) then
+      return 
+   end
+
+   if local_player.Character then
+      hook_character(local_player.Character)
+   end
+
+   local char_connection = local_player.CharacterAdded:Connect(function(character)
+      hook_character(character)
+   end)
+
+   getgenv().FlamesLibrary.connect(tag_name, char_connection)
+end
+
+local function stop_anti_sit()
+   if not getgenv().FlamesLibrary.is_alive(tag_name) then
+      return 
+   end
+
+   getgenv().FlamesLibrary.disconnect(tag_name)
+end
+
+getgenv().toggle_anti_sit = function(state)
+   getgenv().anti_sit_enabled = state
+
+   if state then
+      start_anti_sit()
+   else
+      stop_anti_sit()
+   end
+end
+
+addcmd("nosit", {"antisit"}, function(args, speaker)
+   getgenv().toggle_anti_sit(true)
 end)
 
 addcmd("unnosit", {}, function(args, speaker)
-    speaker.Character:FindFirstChildWhichIsA("Humanoid"):SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+   getgenv().toggle_anti_sit(false)
 end)
 
 addcmd("jump", {}, function(args, speaker)

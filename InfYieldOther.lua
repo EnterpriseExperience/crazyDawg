@@ -5064,7 +5064,6 @@ CMDs[#CMDs + 1] = {NAME = 'rolewatchstop / unrolewatch', DESC = 'Disable Rolewat
 CMDs[#CMDs + 1] = {NAME = 'rolewatchleave', DESC = 'Toggle if you should leave the game if someone from a watched group joins the server'}
 CMDs[#CMDs + 1] = {NAME = 'staffwatch', DESC = 'Notify if a staff member of the game joins the server'}
 CMDs[#CMDs + 1] = {NAME = 'unstaffwatch', DESC = 'Disable Staffwatch'}
-CMDs[#CMDs + 1] = {NAME = 'handlekill / hkill [player] [radius] (TOOL)', DESC = 'Kills a player using tool damage (YOU NEED A TOOL)'}
 CMDs[#CMDs + 1] = {NAME = 'fling', DESC = 'Flings anyone you touch'}
 CMDs[#CMDs + 1] = {NAME = 'unfling', DESC = 'Disables the fling command'}
 CMDs[#CMDs + 1] = {NAME = 'flyfling [speed]', DESC = 'Basically the invisfling command but not invisible'}
@@ -6153,6 +6152,10 @@ function ESP(plr, logic)
 			end
 		end
 	end)
+end
+
+if not getgenv().ESP then
+	getgenv().ESP = ESP
 end
 
 function CHMS(plr)
@@ -12423,60 +12426,7 @@ function attach(speaker,target)
 	end
 end
 
-function kill(speaker,target,fast)
-	if tools(speaker) then
-		if target ~= nil then
-			local NormPos = getRoot(speaker.Character).CFrame
-			if not fast then
-				refresh(speaker)
-				wait()
-				repeat wait() until speaker.Character ~= nil and getRoot(speaker.Character)
-				wait(0.3)
-			end
-			local hrp = getRoot(speaker.Character)
-			attach(speaker,target)
-			repeat
-				wait()
-				hrp.CFrame = CFrame.new(999999, workspace.FallenPartsDestroyHeight + 5,999999)
-			until not getRoot(target.Character) or not getRoot(speaker.Character)
-			speaker.CharacterAdded:Wait():WaitForChild("HumanoidRootPart").CFrame = NormPos
-		end
-	else
-		Notify_InfP('Tool Required','You need to have an item in your inventory to use this command')
-	end
-end
-
-addcmd("handlekill", {"hkill"}, function(args, speaker)
-	if not firetouchinterest then
-		return Notify_InfP("Incompatible Exploit", "Your exploit does not support this command (missing firetouchinterest)")
-	end
-	if not speaker.Character then return end
-	local tool = speaker.Character:FindFirstChildWhichIsA("Tool")
-	local handle = tool and tool:FindFirstChild("Handle")
-	if not handle then
-		return Notify_InfP("Handle Kill", "You need to hold a \"Tool\" that does damage on touch. For example a common Sword tool.")
-	end
-	local range = tonumber(args[2]) or math.huge
-    if range ~= math.huge then Notify_InfP("Handle Kill", ("Started!\nRadius: %s"):format(tostring(range):upper())) end
-
-	while task.wait() and speaker.Character and tool.Parent and tool.Parent == speaker.Character do
-		for _, plr in next, getPlayer(args[1], speaker) do
-			plr = Players[plr]
-			if plr ~= speaker and plr.Character then
-				local hum = plr.Character:FindFirstChildWhichIsA("Humanoid")
-				local root = hum and getRoot(plr.Character)
-
-				if root and hum.Health > 0 and hum:GetState() ~= Enum.HumanoidStateType.Dead and speaker:DistanceFromCharacter(root.Position) <= range then
-					firetouchinterest(handle, root, 1)
-					firetouchinterest(handle, root, 0)
-				end
-			end
-		end
-	end
-
-	Notify_InfP("Handle Kill", "Stopped!")
-end)
-
+local tpwalking
 local hb = RunService.Heartbeat
 addcmd('tpwalk', {'teleportwalk'}, function(args, speaker)
 	tpwalking = true
@@ -12497,54 +12447,6 @@ end)
 addcmd('untpwalk', {'unteleportwalk'}, function(args, speaker)
 	tpwalking = false
 end)
-
-function bring(speaker,target,fast)
-	if tools(speaker) then
-		if target ~= nil then
-			local NormPos = getRoot(speaker.Character).CFrame
-			if not fast then
-				refresh(speaker)
-				wait()
-				repeat wait() until speaker.Character ~= nil and getRoot(speaker.Character)
-				wait(0.3)
-			end
-			local hrp = getRoot(speaker.Character)
-			attach(speaker,target)
-			repeat
-				wait()
-				hrp.CFrame = NormPos
-			until not getRoot(target.Character) or not getRoot(speaker.Character)
-			speaker.CharacterAdded:Wait():WaitForChild("HumanoidRootPart").CFrame = NormPos
-		end
-	else
-		Notify_InfP('Tool Required','You need to have an item in your inventory to use this command')
-	end
-end
-
-function teleport(speaker,target,target2,fast)
-	if tools(speaker) then
-		if target ~= nil then
-			local NormPos = getRoot(speaker.Character).CFrame
-			if not fast then
-				refresh(speaker)
-				wait()
-				repeat wait() until speaker.Character ~= nil and getRoot(speaker.Character)
-				wait(0.3)
-			end
-			local hrp = getRoot(speaker.Character)
-			local hrp2 = getRoot(target2.Character)
-			attach(speaker,target)
-			repeat
-				wait()
-				hrp.CFrame = hrp2.CFrame
-			until not getRoot(target.Character) or not getRoot(speaker.Character)
-			wait(1)
-			speaker.CharacterAdded:Wait():WaitForChild("HumanoidRootPart").CFrame = NormPos
-		end
-	else
-		Notify_InfP('Tool Required','You need to have an item in your inventory to use this command')
-	end
-end
 
 addcmd('spin',{},function(args, speaker)
 	local spinSpeed = 20
@@ -13077,7 +12979,7 @@ addcmd("jerk", {}, function(args, speaker)
 	if not humanoid or not backpack then return end
 
 	local tool = Instance.new("Tool")
-	tool.Name = "Jerk Off"
+	tool.Name = "Jerk"
 	tool.ToolTip = "in the stripped club. straight up \"jorking it\" . and by \"it\" , haha, well. let's justr say. My peanits."
 	tool.RequiresHandle = false
 	tool.Parent = backpack
@@ -13192,12 +13094,12 @@ addcmd("phonebook", {"call"}, function(args, speaker)
 end)
 
 addcmd("permadeath", {}, function(args, speaker)
-    if replicatesignal then
-        permadeath(speaker)
-        Notify_InfP("Permadeath", "Enabled")
-    else
-        Notify_InfP("Incompatible Exploit", "Your exploit does not support this command (missing replicatesignal)")
-    end
+	if replicatesignal then
+		permadeath(speaker)
+		Notify_InfP("Permadeath", "Enabled")
+	else
+		Notify_InfP("Incompatible Exploit", "Your exploit does not support this command (missing replicatesignal)")
+	end
 end)
 
 local freezingua = nil

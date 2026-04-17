@@ -7419,6 +7419,7 @@ function sFLY(vfly)
 	end
 
 	flyKeyDown = UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then return end
 		if input.KeyCode == Enum.KeyCode.W then
 			CONTROL.F = (vfly and vehicleflyspeed or iyflyspeed)
 		elseif input.KeyCode == Enum.KeyCode.S then
@@ -7436,6 +7437,7 @@ function sFLY(vfly)
 	end)
 
 	flyKeyUp = UserInputService.InputEnded:Connect(function(input, processed)
+		if processed then return end
 		if input.KeyCode == Enum.KeyCode.W then
 			CONTROL.F = 0
 		elseif input.KeyCode == Enum.KeyCode.S then
@@ -7466,7 +7468,6 @@ local velocityHandlerName = randomString()
 local gyroHandlerName = randomString()
 local mfly1
 local mfly2
-
 local unmobilefly = function(speaker)
 	pcall(function()
 		FLYING = false

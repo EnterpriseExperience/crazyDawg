@@ -1,6 +1,6 @@
 if GET_LOADED_IY and not _G.DEBUGGING_IY_VER == true then
    -- error("Infinite Premium is already running!", 0)
-   return
+   return 
 end
 if getgenv().IY_LOADED then
 	-- error("Infinite Yield is already running, you cannot use both at the same time!", 0)
@@ -416,12 +416,6 @@ getgenv().FlamesLibrary.cleanup_all = function()
 	for name in pairs(getgenv().FlamesLibrary._connections) do
 		getgenv().FlamesLibrary.disconnect(name)
 	end
-end
-
-if not getgenv().GlobalEnvironmentFramework_Initialized then
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/GlobalEnv_Framework.lua"))()
-	task.wait(0.1)
-	getgenv().GlobalEnvironmentFramework_Initialized = true
 end
 
 ScaledHolder.Name = randomString()
@@ -2240,12 +2234,211 @@ function vtype(o, t)
 	return type(o) == t
 end
 
+getgenv().get_or_set = getgenv().get_or_set or function(name, value)
+	if rawget and rawset then
+		local existing = rawget(getgenv(), name)
+		if existing == nil then
+			rawset(getgenv(), name, value)
+			return value
+		end
+		return existing
+	end
+
+	local existing = getgenv()[name]
+
+	if existing == nil then
+		getgenv()[name] = value
+		return value
+	end
+
+	return existing
+end
+
+function hb()
+	local rs = cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
+	rs.Heartbeat:Wait()
+end
+
+local function wait_for_datamodel(inst)
+	if not inst then return false end
+	local attempts = 0
+	local maximum_attempts = 300
+
+	while attempts < maximum_attempts do
+		if inst.Parent and inst:IsDescendantOf(workspace) then
+			return true
+		end
+		task.wait(0.1)
+		attempts += 1
+	end
+
+	return false
+end
+
+local function wait_for_child(parent, name)
+	if not parent then return nil end
+	local existing = parent:FindFirstChild(name)
+	if existing then return existing end
+	local ok, obj = pcall(function()
+		return parent:WaitForChild(name, math.huge)
+	end)
+
+	return ok and obj or nil
+end
+
+local function wait_for_descendant(parent, name)
+	if not parent then return nil end
+	local found = parent:FindFirstChild(name, true)
+	if found then return found end
+	local conn
+	local result = nil
+
+	conn = parent.DescendantAdded:Connect(function(d)
+		if d.Name == name then
+			result = d
+			conn:Disconnect()
+		end
+	end)
+
+	while not result do
+		local check = parent:FindFirstChild(name, true)
+		if check then
+			result = check
+			conn:Disconnect()
+			break
+		end
+		task.wait()
+	end
+
+	return result
+end
+
+local function wait_for_child_safe(parent, name)
+	if not parent then return nil end
+
+	local ok, obj = pcall(function()
+		return parent:WaitForChild(name, 9e9)
+	end)
+
+	if ok and obj then
+		return obj
+	end
+
+	return nil
+end
+
+local function retry_find(func, retries, delay)
+	for _ = 1, retries do
+		local ok, result = pcall(func)
+		if ok and result then
+			return result
+		end
+		task.wait(delay)
+	end
+	return nil
+end
+
+local function wait_character(player, timeout)
+	timeout = timeout or 10
+	local start = os.clock()
+
+	while os.clock() - start < timeout do
+		local char = player.Character
+		if char and char.Parent then
+			return char
+		end
+		hb()
+	end
+
+	return nil
+end
+
+local function wait_instance(parent, resolver, timeout)
+	timeout = timeout or 10
+	local start_time = os.clock()
+	local inst = resolver()
+	if inst then
+		return inst
+	end
+
+	local conn
+	conn = parent.ChildAdded:Connect(function()
+		inst = resolver()
+	end)
+
+	while not inst and os.clock() - start_time < timeout do
+		hb()
+	end
+
+	if conn then
+		conn:Disconnect()
+	end
+
+	return inst
+end
+
+getgenv().return_char = getgenv().return_char or function(Player, timeout)
+	if not Player or not Player:IsA("Player") then return nil end
+
+	timeout = tonumber(timeout) or 5
+	local start = os.clock()
+
+	while os.clock() - start < timeout do
+		local char = Player.Character
+
+		if char and char.Parent and char:IsDescendantOf(game) then -- neat.
+			local hum = char:FindFirstChildOfClass("Humanoid")
+
+			if hum and hum.Health > 0 then
+				return char
+			end
+		end
+
+		task.wait()
+	end
+
+	return nil
+end
+
+function get_char(player, time_out)
+	time_out = tonumber(time_out) or 5
+	if not player or not player:IsA("Player") then return nil end
+	return wait_character(player, time_out)
+end
+
 function getRoot(char)
-	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
-	return rootPart
+	char = char or game.Players.LocalPlayer.Character or get_char(speaker or game.Players.LocalPlayer, 10)
+
+	if not char then
+		local attempts = 0
+		repeat
+			task.wait(0.15)
+			attempts = attempts + 1
+			char = game.Players.LocalPlayer.Character
+		until char or attempts >= 5
+		if not char then
+			return nil
+		end
+	end
+
+	local root
+	local attempts = 0
+
+	repeat
+		root = char:FindFirstChild('HumanoidRootPart')
+			or char:FindFirstChild('Torso')
+			or char:FindFirstChild('UpperTorso')
+
+		if not root then
+			task.wait(0.5)
+			attempts = attempts + 1
+		end
+	until root or attempts >= 5
+
+	return root
 end
 wait(0.1)
-getgenv().getRoot = getgenv().getRoot or getRoot
+getgenv().getRoot = getRoot
 
 function tools(plr)
 	if plr:FindFirstChildOfClass("Backpack"):FindFirstChildOfClass('Tool') or plr.Character:FindFirstChildOfClass('Tool') then
@@ -2353,12 +2546,7 @@ getgenv().vehiclefly_control_inf_premium_tbl = getgenv().vehiclefly_control_inf_
 getgenv().vehiclefly_noclip_inf_premium_toggled = getgenv().vehiclefly_noclip_inf_premium_toggled or false
 getgenv().vehiclefly_collisions_tbl_infinite_premium = getgenv().vehiclefly_collisions_tbl_infinite_premium or {}
 local controlModule
-if UserInputService.TouchEnabled then
-	controlModule = require(
-		game.Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
-	)
-end
-
+if UserInputService.TouchEnabled then controlModule = require(game.Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")) end
 getgenv().cleanup_vehicle_fly_main_inf_premium = function()
 	for _, c in pairs(getgenv().vehiclefly_conns_infinite_premium) do
 		pcall(function() c:Disconnect() end)
@@ -5526,13 +5714,12 @@ getgenv().execCmd = getgenv().execCmd or function(cmdStr,speaker,store)
 end	
 
 function addcmd(name,alias,func,plgn)
-	cmds[#cmds+1]=
-		{
-			NAME=name;
-			ALIAS=alias or {};
-			FUNC=func;
-			PLUGIN=plgn;
-		}
+	cmds[#cmds+1]= {
+		NAME=name;
+		ALIAS=alias or {};
+		FUNC=func;
+		PLUGIN=plgn;
+	}
 end
 
 function removecmd(cmd)
@@ -5554,26 +5741,24 @@ function removecmd(cmd)
 end
 
 function overridecmd(name, func)
-    local cmd = findCmd(name)
-    if cmd and cmd.FUNC then cmd.FUNC = func end
+	local cmd = findCmd(name)
+	if cmd and cmd.FUNC then cmd.FUNC = func end
 end
 
 function addbind(cmd,key,iskeyup,toggle)
 	if toggle then
-		binds[#binds+1]=
-			{
-				COMMAND=cmd;
-				KEY=key;
-				ISKEYUP=iskeyup;
-				TOGGLE = toggle;
-			}
+		binds[#binds+1]= {
+			COMMAND=cmd;
+			KEY=key;
+			ISKEYUP=iskeyup;
+			TOGGLE = toggle;
+		}
 	else
-		binds[#binds+1]=
-			{
-				COMMAND=cmd;
-				KEY=key;
-				ISKEYUP=iskeyup;
-			}
+		binds[#binds+1]= {
+			COMMAND=cmd;
+			KEY=key;
+			ISKEYUP=iskeyup;
+		}
 	end
 end
 
@@ -6845,7 +7030,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/InfYieldOther.lua'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Infinite_Premium.lua'))()")
 	end
 end)
 
@@ -10123,6 +10308,32 @@ addcmd("sitwalk", {}, function(args, speaker)
 	speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
+get_or_set("wait_for_datamodel", wait_for_datamodel)
+get_or_set("wait_for_child", wait_for_child)
+get_or_set("wait_for_descendant", wait_for_descendant)
+get_or_set("wait_for_child_safe", wait_for_child_safe)
+get_or_set("wait_instance", wait_instance)
+get_or_set("retry_find", retry_find)
+getgenv().get_root = getgenv().get_root or function(player, time_out)
+	time_out = time_out and tonumber(time_out) or 5
+	local char = wait_character(player, time_out)
+	if not char then return nil end
+	return wait_instance(char, function()
+		return char:FindFirstChild("HumanoidRootPart")
+			or char:FindFirstChild("UpperTorso")
+			or char:FindFirstChild("Torso")
+	end, time_out)
+end
+
+getgenv().get_human = getgenv().get_human or function(player, time_out)
+	time_out = tonumber(time_out) or 5
+	local char = wait_character(player, time_out)
+	if not char then return nil end
+	return wait_instance(char, function()
+		return char:FindFirstChildWhichIsA("Humanoid")
+	end, time_out)
+end
+
 getgenv().hasProp = getgenv().hasProp or function(inst, prop)
    return inst and isProperty(inst, prop) ~= nil
 end
@@ -10137,91 +10348,112 @@ getgenv().safeSet = getgenv().safeSet or function(inst, prop, val)
 end
 
 getgenv().anti_sit_enabled = getgenv().anti_sit_enabled or false
-local local_player = getgenv().LocalPlayer or Players.LocalPlayer
-local tag_name = "anti_sit_system"
+getgenv().anti_sit_connections = getgenv().anti_sit_connections or {}
+local local_player = speaker or game.Players.LocalPlayer or cloneref and cloneref(game:GetService("Players")).LocalPlayer or game:GetService("Players").LocalPlayer
+local function cleanup_connections()
+	for _, conn in pairs(getgenv().anti_sit_connections) do
+		if conn and conn.Connected then
+			conn:Disconnect()
+		end
+	end
+	getgenv().anti_sit_connections = {}
+end
+
 local function hook_character(character)
-   if not character or not character:FindFirstChild("HumanoidRootPart") then character:WaitForChild("HumanoidRootPart") end
-   local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
-   local seated_connection
-   seated_connection = humanoid.Seated:Connect(function(active)
-      if not getgenv().anti_sit_enabled then
-         return 
-      end
-
-      if active then
-         task.wait()
-         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-         humanoid.Sit = false
-      end
-   end)
-
-   getgenv().FlamesLibrary.connect(tag_name, seated_connection)
+	if not character then
+		character = get_char(local_player, 10)
+	end
+	if not character then return end
+	if not character:FindFirstChild("HumanoidRootPart") then
+		character:WaitForChild("HumanoidRootPart")
+	end
+	local humanoid = get_human(local_player, 10)
+	if not humanoid then return end
+	local conn
+	conn = humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
+		if not getgenv().anti_sit_enabled then return end
+		if humanoid.Sit then
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+			task.spawn(function()
+				if humanoid.SeatPart then
+					local weld = humanoid.SeatPart:FindFirstChildOfClass("Weld")
+					if weld then weld:Destroy() end
+					local prox = humanoid.SeatPart:FindFirstChildOfClass("ProximityPrompt")
+					if prox and prox.Enabled == false then
+						prox.Enabled = true
+					end
+				end
+				for _ = 1, 5 do
+					task.wait()
+					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+					humanoid.Sit = false
+				end
+				humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+			end)
+		end
+	end)
+	table.insert(getgenv().anti_sit_connections, conn)
 end
 
 local function start_anti_sit()
-   if getgenv().FlamesLibrary.is_alive(tag_name) then
-      return 
-   end
-
-   if local_player.Character then
-      hook_character(local_player.Character)
-   end
-
-   local char_connection = local_player.CharacterAdded:Connect(function(character)
-      hook_character(character)
-   end)
-
-   getgenv().FlamesLibrary.connect(tag_name, char_connection)
+	if #getgenv().anti_sit_connections > 0 then return end
+	hook_character(local_player.Character)
+	local char_conn = local_player.CharacterAdded:Connect(function(character) hook_character(character) end)
+	table.insert(getgenv().anti_sit_connections, char_conn)
 end
 
 local function stop_anti_sit()
-   if not getgenv().FlamesLibrary.is_alive(tag_name) then
-      return 
-   end
-
-   getgenv().FlamesLibrary.disconnect(tag_name)
+   cleanup_connections()
 end
 
 getgenv().toggle_anti_sit = function(state)
-   getgenv().anti_sit_enabled = state
-
-   if state then
-      start_anti_sit()
-   else
-      stop_anti_sit()
-   end
+	getgenv().anti_sit_enabled = state
+	if state then
+		start_anti_sit()
+	else
+		stop_anti_sit()
+	end
 end
 
 addcmd("nosit", {"antisit"}, function(args, speaker)
-   getgenv().toggle_anti_sit(true)
+	if getgenv().anti_sit_enabled then return end
+	getgenv().toggle_anti_sit(true)
 end)
 
 addcmd("unnosit", {}, function(args, speaker)
-   getgenv().toggle_anti_sit(false)
+	getgenv().toggle_anti_sit(false)
 end)
 
 addcmd("jump", {}, function(args, speaker)
 	speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 end)
 
-local infJump
-infJumpDebounce = false
+local inf_jump
+inf_jump_debounce = false
 addcmd("infjump", {"infinitejump"}, function(args, speaker)
-	if infJump then infJump:Disconnect() end
-	infJumpDebounce = false
-	infJump = UserInputService.JumpRequest:Connect(function()
-		if not infJumpDebounce then
-			infJumpDebounce = true
-			speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-			wait()
-			infJumpDebounce = false
+	if inf_jump then inf_jump:Disconnect() end
+	inf_jump_debounce = false
+	inf_jump = UserInputService.JumpRequest:Connect(function()
+		if not inf_jump_debounce then
+			inf_jump_debounce = true
+
+			local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+			if humanoid then
+				repeat
+					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+					task.wait(0.15)
+				until not UserInputService:IsKeyDown(Enum.KeyCode.Space)
+					and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping
+			end
+
+			inf_jump_debounce = false
 		end
 	end)
 end)
 
 addcmd("uninfjump", {"uninfinitejump", "noinfjump", "noinfinitejump"}, function(args, speaker)
-	if infJump then infJump:Disconnect() end
-	infJumpDebounce = false
+	if inf_jump then inf_jump:Disconnect() end
+	inf_jump_debounce = false
 end)
 
 local flyjump
@@ -10264,9 +10496,8 @@ addcmd('unautojump',{'noautojump', 'noajump', 'unajump'},function(args, speaker)
 end)
 
 addcmd('edgejump',{'ejump'},function(args, speaker)
-	local Char = speaker.Character
+	local Char = speaker.Character or get_char(speaker, 5)
 	local Human = Char and Char:FindFirstChildWhichIsA("Humanoid")
-	-- Full credit to NoelGamer06 @V3rmillion
 	local state
 	local laststate
 	local lastcf
@@ -10296,29 +10527,30 @@ addcmd('unedgejump',{'noedgejump', 'noejump', 'unejump'},function(args, speaker)
 end)
 
 addcmd("team", {}, function(args, speaker)
-    local teamName = getstring(1)
-    local team = nil
-    local root = speaker.Character and getRoot(speaker.Character)
-    for _, v in ipairs(Teams:GetChildren()) do
-        if v.Name:lower():match(teamName:lower()) then
-            team = v
-            break
-        end
-    end
-    if not team then
-        return Notify_InfP("Invalid Team", teamName .. " is not a valid team")
-    end
-    if root and firetouchinterest then
-        for _, v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("SpawnLocation") and v.BrickColor == team.TeamColor and v.AllowTeamChangeOnTouch == true then
-                firetouchinterest(v, root, 0)
-                firetouchinterest(v, root, 1)
-                break
-            end
-        end
-    else
-        speaker.Team = team
-    end
+	local teamName = getstring(1)
+	local team = nil
+	local root = speaker.Character and getRoot(speaker.Character)
+	for _, v in ipairs(Teams:GetChildren()) do
+		if v.Name:lower():match(teamName:lower()) then
+			team = v
+			break
+		end
+	end
+	if not team then
+		return Notify_InfP("Invalid Team", teamName.." is not a valid team")
+	end
+
+	if root and firetouchinterest then
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("SpawnLocation") and v.BrickColor == team.TeamColor and v.AllowTeamChangeOnTouch == true then
+				firetouchinterest(v, root, 0)
+				firetouchinterest(v, root, 1)
+				break
+			end
+		end
+	else
+		speaker.Team = team
+	end
 end)
 
 addcmd('nobgui',{'unbgui','nobillboardgui','unbillboardgui','noname','rohg'},function(args, speaker)
@@ -10434,7 +10666,7 @@ addcmd("emotegui", {"allemotes"}, function(args, speaker)
 	else
 		Notify_InfP("Emotes", "Toggle with the 'F' button on the left side of your screen.")
 	end
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/flames_emotes_gui_new.lua"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Emotes_Backup.lua"))()
 end)
 
 addcmd('noanim',{},function(args, speaker)
@@ -10866,7 +11098,7 @@ end)
 
 addcmd("explorer", {"dex"}, function(args, speaker)
    Notify_InfP("Loading", "Hold on a sec")
-   loadstring(game:HttpGet("https://github.com/AZYsGithub/DexPlusPlus/releases/latest/download/out.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Dex_Plus_Plus.lua"))()
 end)
 
 addcmd('olddex', {'odex'}, function(args, speaker)
@@ -11196,12 +11428,12 @@ end)
 
 addcmd("SystemBroken", {}, function()
 	if getgenv().GUI_Loaded then return end
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/SystemBroken/refs/heads/main/source"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/System_Broken.lua"))()
 end)
 
 addcmd("netstats", {"netstatsgui", "performancegui", "performancestatsgui"}, function()
 	if getgenv().performance_stats then return end
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/OrionLibraryReWrittenCelery/refs/heads/main/grab_file_performance"))()
+	loadstring(game:HttpGet("https://pastebin.com/raw/DuG2RmjF"))()
 end)
 
 function getTorso(x)
@@ -13531,18 +13763,18 @@ end
 IYMouse.Move:Connect(checkTT)
 
 CaptureService.CaptureBegan:Connect(function()
-    PARENT.Enabled = false
+	PARENT.Enabled = false
 end)
 
 CaptureService.CaptureEnded:Connect(function()
-    task.delay(0.1, function()
-        PARENT.Enabled = true
-    end)
+	task.delay(0.1, function()
+		PARENT.Enabled = true
+	end)
 end)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/version")
+		local versionJson = game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Infinite_P_Version")
 		return HttpService:JSONDecode(versionJson)
 	end)
 

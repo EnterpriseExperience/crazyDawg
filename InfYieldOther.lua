@@ -8582,7 +8582,7 @@ local espParts = {}
 local partEspTrigger = nil
 function partAdded(part)
 	if #espParts > 0 then
-		if FindInTable(espParts,part.Name:lower()) then
+		if part:IsA("BasePart") and FindInTable(espParts, part.Name:lower()) then
 			local a = Instance.new("BoxHandleAdornment")
 			a.Name = part.Name:lower().."_PESP"
 			a.Parent = part

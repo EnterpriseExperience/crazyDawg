@@ -3933,7 +3933,7 @@ function CreateJoinLabel(plr,ID)
 end
 
 IYMouse.KeyDown:Connect(function(Key)
-	if (Key==prefix) then
+	if Key == prefix and not UserInputService:IsKeyDown(Enum.KeyCode.CapsLock) then
 		RunService.RenderStepped:Wait()
 		Cmdbar:CaptureFocus()
 		maximizeHolder()
@@ -5424,7 +5424,6 @@ CMDs[#CMDs + 1] = {NAME = 'unmuteallvcs', DESC = 'Unmutes voice chat for all pla
 CMDs[#CMDs + 1] = {NAME = 'mutevc [player]', DESC = 'Mutes the voice chat of a player'}
 CMDs[#CMDs + 1] = {NAME = 'unmutevc [player]', DESC = 'Unmutes the voice chat of a player'}
 CMDs[#CMDs + 1] = {NAME = 'phonebook / call', DESC = 'Prompts the Roblox phonebook UI to let you call your friends'}
--- wait()
 
 for i = 1, #CMDs do
 	local newcmd = Example:Clone()
@@ -12963,42 +12962,42 @@ RolewatchConnection = Players.PlayerAdded:Connect(function(player)
 end)
 
 addcmd("rolewatch", {}, function(args, speaker)
-    local groupId = tonumber(args[1] or 0)
-    local roleName = args[2] and tostring(getstring(2))
-    if groupId and roleName then
-        RolewatchData.Group = groupId
-        RolewatchData.Role = roleName
-        Notify_InfP("Rolewatch", "Watching Group ID \"" .. tostring(groupId) .. "\" for Role \"" .. roleName .. "\"")
-    end
+	local groupId = tonumber(args[1] or 0)
+	local roleName = args[2] and tostring(getstring(2))
+	if groupId and roleName then
+		RolewatchData.Group = groupId
+		RolewatchData.Role = roleName
+		Notify_InfP("Rolewatch", "Watching Group ID \"" .. tostring(groupId) .. "\" for Role \"" .. roleName .. "\"")
+	end
 end)
 
 addcmd("rolewatchstop", {}, function(args, speaker)
-    RolewatchData.Group = 0
-    RolewatchData.Role = ""
-    RolewatchData.Leave = false
-    Notify_InfP("Rolewatch", "Disabled")
+	RolewatchData.Group = 0
+	RolewatchData.Role = ""
+	RolewatchData.Leave = false
+	Notify_InfP("Rolewatch", "Disabled")
 end)
 
 addcmd("rolewatchleave", {"unrolewatch"}, function(args, speaker)
-    RolewatchData.Leave = not RolewatchData.Leave
-    Notify_InfP("Rolewatch", RolewatchData.Leave and "Leave has been Enabled" or "Leave has been Disabled")
+	RolewatchData.Leave = not RolewatchData.Leave
+	Notify_InfP("Rolewatch", RolewatchData.Leave and "Leave has been Enabled" or "Leave has been Disabled")
 end)
 
 staffRoles = {"mod", "admin", "staff", "dev", "founder", "owner", "supervis", "manager", "management", "executive", "president", "chairman", "chairwoman", "chairperson", "director"}
 
 getStaffRole = function(player)
-    local playerRole = player:GetRoleInGroup(game.CreatorId)
-    local result = {Role = playerRole, Staff = false}
-    if player:IsInGroup(1200769) then
-        result.Role = "Roblox Employee"
-        result.Staff = true
-    end
-    for _, role in pairs(staffRoles) do
-        if string.find(string.lower(playerRole), role) then
-            result.Staff = true
-        end
-    end
-    return result
+	local playerRole = player:GetRoleInGroup(game.CreatorId)
+	local result = {Role = playerRole, Staff = false}
+	if player:IsInGroup(1200769) then
+		result.Role = "Roblox Employee"
+		result.Staff = true
+	end
+	for _, role in pairs(staffRoles) do
+		if string.find(string.lower(playerRole), role) then
+			result.Staff = true
+		end
+	end
+	return result
 end
 
 addcmd("staffwatch", {}, function(args, speaker)
@@ -13188,10 +13187,8 @@ end)
 addcmd("listento", {}, function(args, speaker)
 	execCmd("unlistento")
 	if not args[1] then return end
-
 	local player = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
 	local root = player and player.Character and getRoot(player.Character)
-
 	if root then
 		SoundService:SetListener(Enum.ListenerType.ObjectPosition, root)
 		listentoChar = player.CharacterAdded:Connect(function()
@@ -13210,16 +13207,13 @@ addcmd("jerk", {}, function(args, speaker)
 	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
 	local backpack = speaker:FindFirstChildWhichIsA("Backpack")
 	if not humanoid or not backpack then return end
-
 	local tool = Instance.new("Tool")
 	tool.Name = "Jerk"
 	tool.ToolTip = "in the stripped club. straight up \"jorking it\" . and by \"it\" , haha, well. let's justr say. My peanits."
 	tool.RequiresHandle = false
 	tool.Parent = backpack
-
 	local jorkin = false
 	local track = nil
-
 	local function stopTomfoolery()
 		jorkin = false
 		if track then
@@ -13338,104 +13332,104 @@ end)
 local freezingua = nil
 frozenParts = {}
 addcmd('freezeunanchored',{'freezeua'},function(args, speaker)
-    local badnames = {
-        "Head",
-        "UpperTorso",
-        "LowerTorso",
-        "RightUpperArm",
-        "LeftUpperArm",
-        "RightLowerArm",
-        "LeftLowerArm",
-        "RightHand",
-        "LeftHand",
-        "RightUpperLeg",
-        "LeftUpperLeg",
-        "RightLowerLeg",
-        "LeftLowerLeg",
-        "RightFoot",
-        "LeftFoot",
-        "Torso",
-        "Right Arm",
-        "Left Arm",
-        "Right Leg",
-        "Left Leg",
-        "HumanoidRootPart"
-    }
-    local function FREEZENOOB(v)
-        if v:IsA("BasePart" or "UnionOperation") and v.Anchored == false then
-            local BADD = false
-            for i = 1,#badnames do
-                if v.Name == badnames[i] then
-                    BADD = true
-                end
-            end
-            if speaker.Character and v:IsDescendantOf(speaker.Character) then
-                BADD = true
-            end
-            if BADD == false then
-                for i,c in pairs(v:GetChildren()) do
-                    if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
-                        c:Destroy()
-                    end
-                end
-                local bodypos = Instance.new("BodyPosition")
-                bodypos.Parent = v
-                bodypos.Position = v.Position
-                bodypos.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
-                local bodygyro = Instance.new("BodyGyro")
-                bodygyro.Parent = v
-                bodygyro.CFrame = v.CFrame
-                bodygyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
-                if not table.find(frozenParts,v) then
-                    table.insert(frozenParts,v)
-                end
-            end
-        end
-    end
-    for i,v in pairs(workspace:GetDescendants()) do
-        FREEZENOOB(v)
-    end
-    freezingua = workspace.DescendantAdded:Connect(FREEZENOOB)
+	local badnames = {
+		"Head",
+		"UpperTorso",
+		"LowerTorso",
+		"RightUpperArm",
+		"LeftUpperArm",
+		"RightLowerArm",
+		"LeftLowerArm",
+		"RightHand",
+		"LeftHand",
+		"RightUpperLeg",
+		"LeftUpperLeg",
+		"RightLowerLeg",
+		"LeftLowerLeg",
+		"RightFoot",
+		"LeftFoot",
+		"Torso",
+		"Right Arm",
+		"Left Arm",
+		"Right Leg",
+		"Left Leg",
+		"HumanoidRootPart"
+	}
+	local function FREEZENOOB(v)
+		if v:IsA("BasePart" or "UnionOperation") and v.Anchored == false then
+			local BADD = false
+			for i = 1,#badnames do
+				if v.Name == badnames[i] then
+					BADD = true
+				end
+			end
+			if speaker.Character and v:IsDescendantOf(speaker.Character) then
+				BADD = true
+			end
+			if BADD == false then
+				for i,c in pairs(v:GetChildren()) do
+					if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
+						c:Destroy()
+					end
+				end
+				local bodypos = Instance.new("BodyPosition")
+				bodypos.Parent = v
+				bodypos.Position = v.Position
+				bodypos.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+				local bodygyro = Instance.new("BodyGyro")
+				bodygyro.Parent = v
+				bodygyro.CFrame = v.CFrame
+				bodygyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+				if not table.find(frozenParts,v) then
+					table.insert(frozenParts,v)
+				end
+			end
+		end
+	end
+	for i,v in pairs(workspace:GetDescendants()) do
+		FREEZENOOB(v)
+	end
+	freezingua = workspace.DescendantAdded:Connect(FREEZENOOB)
 end)
 
 addcmd('thawunanchored',{'thawua','unfreezeunanchored','unfreezeua'},function(args, speaker)
-    if freezingua then
-        freezingua:Disconnect()
-    end
-    for i,v in pairs(frozenParts) do
-        for i,c in pairs(v:GetChildren()) do
-            if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
-                c:Destroy()
-            end
-        end
-    end
-    frozenParts = {}
+	if freezingua then
+		freezingua:Disconnect()
+	end
+	for i,v in pairs(frozenParts) do
+		for i,c in pairs(v:GetChildren()) do
+			if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
+				c:Destroy()
+			end
+		end
+	end
+	frozenParts = {}
 end)
 
 addcmd('tpunanchored',{'tpua'},function(args, speaker)
-    local players = getPlayer(args[1], speaker)
-    for i,v in pairs(players) do
-        local Forces = {}
-        for _,part in pairs(workspace:GetDescendants()) do
-            if Players[v].Character:FindFirstChild('Head') and part:IsA("BasePart" or "UnionOperation" or "Model") and part.Anchored == false and not part:IsDescendantOf(speaker.Character) and part.Name == "Torso" == false and part.Name == "Head" == false and part.Name == "Right Arm" == false and part.Name == "Left Arm" == false and part.Name == "Right Leg" == false and part.Name == "Left Leg" == false and part.Name == "HumanoidRootPart" == false then
-                for i,c in pairs(part:GetChildren()) do
-                    if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
-                        c:Destroy()
-                    end
-                end
-                local ForceInstance = Instance.new("BodyPosition")
-                ForceInstance.Parent = part
-                ForceInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                table.insert(Forces, ForceInstance)
-                if not table.find(frozenParts,part) then
-                    table.insert(frozenParts,part)
-                end
-            end
-        end
-        for i,c in pairs(Forces) do
-            c.Position = Players[v].Character.Head.Position
-        end
-    end
+	local players = getPlayer(args[1], speaker)
+	for i,v in pairs(players) do
+		local Forces = {}
+		for _,part in pairs(workspace:GetDescendants()) do
+			if Players[v].Character:FindFirstChild('Head') and part:IsA("BasePart" or "UnionOperation" or "Model") and part.Anchored == false and not part:IsDescendantOf(speaker.Character) and part.Name == "Torso" == false and part.Name == "Head" == false and part.Name == "Right Arm" == false and part.Name == "Left Arm" == false and part.Name == "Right Leg" == false and part.Name == "Left Leg" == false and part.Name == "HumanoidRootPart" == false then
+				for i,c in pairs(part:GetChildren()) do
+					if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
+						c:Destroy()
+					end
+				end
+				local ForceInstance = Instance.new("BodyPosition")
+				ForceInstance.Parent = part
+				ForceInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+				table.insert(Forces, ForceInstance)
+				if not table.find(frozenParts,part) then
+					table.insert(frozenParts,part)
+				end
+			end
+		end
+		for i,c in pairs(Forces) do
+			c.Position = Players[v].Character.Head.Position
+		end
+	end
 end)
 
 keycodeMap = {
@@ -13561,22 +13555,22 @@ addcmd('reloadplugin',{},function(args, speaker)
 end)
 
 addcmd("addallplugins", {"loadallplugins"}, function(args, speaker)
-    if not listfiles or not isfolder then
-        Notify_InfP("Incompatible Exploit", "Your exploit does not support this command (missing listfiles/isfolder)")
-        return
-    end
+	if not listfiles or not isfolder then
+		Notify_InfP("Incompatible Exploit", "Your exploit does not support this command (missing listfiles/isfolder)")
+		return
+	end
 
-    for _, filePath in ipairs(listfiles("")) do
-        local fileName = filePath:match("([^/\\]+%.iy)$")
+	for _, filePath in ipairs(listfiles("")) do
+		local fileName = filePath:match("([^/\\]+%.iy)$")
 
-        if fileName and
-            fileName:lower() ~= "iy_fe.iy" and
-            not isfolder(fileName) and
-            not table.find(PluginsTable, fileName)
-        then
-            addPlugin(fileName)
-        end
-    end
+		if fileName and
+			fileName:lower() ~= "iy_fe.iy" and
+			not isfolder(fileName) and
+			not table.find(PluginsTable, fileName)
+		then
+			addPlugin(fileName)
+		end
+	end
 end)
 
 addcmd('removecmd',{'deletecmd'},function(args, speaker)
@@ -13614,13 +13608,13 @@ pcall(function() Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale) 
 Scale.Parent = ScaledHolder
 ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
 Scale:GetPropertyChangedSignal("Scale"):Connect(function()
-    ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
-    for _, v in ScaledHolder:GetDescendants() do
-        if v:IsA("GuiObject") and v.Visible then
-            v.Visible = false
-            v.Visible = true
-        end
-    end
+	ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
+	for _, v in ScaledHolder:GetDescendants() do
+		if v:IsA("GuiObject") and v.Visible then
+			v.Visible = false
+			v.Visible = true
+		end
+	end
 end)
 
 updateColors(currentShade1,shade1)
@@ -13634,7 +13628,6 @@ if PluginsTable ~= nil or PluginsTable ~= {} then
 	FindPlugins(PluginsTable)
 end
 
--- Events
 eventEditor.RegisterEvent("OnExecute")
 eventEditor.RegisterEvent("OnSpawn",{
 	{Type="Player",Name="Player Filter ($1)"}
@@ -13706,21 +13699,20 @@ Players.PlayerAdded:Connect(function(plr)
 end)
 
 if not isLegacyChat then
-    TextChatService.MessageReceived:Connect(function(message)
-        if message.TextSource then
-            local player = Players:GetPlayerByUserId(message.TextSource.UserId)
-            if not player then return end
-
-            if logsEnabled == true then
-                CreateLabel(player.Name, message.Text)
-            end
-            if player.UserId == Players.LocalPlayer.UserId then
-                do_exec(message.Text, Players.LocalPlayer)
-            end
-            eventEditor.FireEvent("OnChatted", player.Name, message.Text)
-            sendChatWebhook(player, message.Text)
-        end
-    end)
+	TextChatService.MessageReceived:Connect(function(message)
+		if message.TextSource then
+			local player = Players:GetPlayerByUserId(message.TextSource.UserId)
+			if not player then return end
+			if logsEnabled == true then
+				CreateLabel(player.Name, message.Text)
+			end
+			if player.UserId == Players.LocalPlayer.UserId then
+				do_exec(message.Text, Players.LocalPlayer)
+			end
+			eventEditor.FireEvent("OnChatted", player.Name, message.Text)
+			sendChatWebhook(player, message.Text)
+		end
+	end)
 end
 
 for _,plr in pairs(Players:GetPlayers()) do
@@ -13739,7 +13731,6 @@ end
 
 if loadedEventData then eventEditor.LoadData(loadedEventData) end
 eventEditor.Refresh()
-
 eventEditor.FireEvent("OnExecute")
 
 if aliases and #aliases > 0 then
@@ -13761,7 +13752,6 @@ if aliases and #aliases > 0 then
 end
 
 IYMouse.Move:Connect(checkTT)
-
 CaptureService.CaptureBegan:Connect(function()
 	PARENT.Enabled = false
 end)

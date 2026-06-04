@@ -10654,7 +10654,7 @@ addcmd("emote", {"emote"}, function(args, speaker)
 	end
 end)
 
-addcmd("emotegui", {"allemotes"}, function(args, speaker)
+addcmd("emotesgui", {"allemotes", "emotegui"}, function(args, speaker)
 	if getgenv().FreeEmotes_Enabled then
 		return 
 	end

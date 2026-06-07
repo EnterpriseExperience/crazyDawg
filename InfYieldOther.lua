@@ -432,8 +432,6 @@ Holder.Position = UDim2.new(1, -250, 1, -220)
 Holder.Size = UDim2.new(0, 250, 0, 220)
 Holder.ZIndex = 10
 table.insert(shade2,Holder)
-g.Holder = Holder
-if g.flowrgb then g.flowrgb("InfinitePremium_Rainbow_RGB_Loop", 1, Holder, true) end
 
 Title.Name = "Title"
 Title.Parent = Holder

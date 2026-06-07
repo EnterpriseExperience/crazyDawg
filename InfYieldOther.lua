@@ -94,9 +94,8 @@ TextChatService = Services.TextChatService
 CaptureService = Services.CaptureService
 VoiceChatService = Services.VoiceChatService
 SocialService = Services.SocialService
-
-IYMouse = cloneref(Players.LocalPlayer:GetMouse())
-PlayerGui = cloneref(Players.LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
+IYMouse = cloneref and cloneref(Players.LocalPlayer:GetMouse()) or Players.LocalPlayer:GetMouse()
+PlayerGui = cloneref and cloneref(Players.LocalPlayer:FindFirstChildWhichIsA("PlayerGui")) or Players.LocalPlayer:FindFirstChildWhichIsA("PlayerGui")
 PlaceId, JobId = game.PlaceId, game.JobId
 xpcall(function()
    IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, UserInputService:GetPlatform())
@@ -13832,7 +13831,7 @@ end)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Infinite_P_Version")
+		local versionJson = game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/version")
 		return HttpService:JSONDecode(versionJson)
 	end)
 

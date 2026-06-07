@@ -160,8 +160,7 @@ if makefolder and isfolder and writefile and isfile then
    end)
 end
 
-currentVersion = "7.7.6"
-
+currentVersion = "7.7.8"
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
 Holder = Instance.new("Frame")
@@ -433,6 +432,8 @@ Holder.Position = UDim2.new(1, -250, 1, -220)
 Holder.Size = UDim2.new(0, 250, 0, 220)
 Holder.ZIndex = 10
 table.insert(shade2,Holder)
+g.Holder = Holder
+if g.flowrgb then g.flowrgb("InfinitePremium_Rainbow_RGB_Loop", 1, Holder, true) end
 
 Title.Name = "Title"
 Title.Parent = Holder
@@ -5137,6 +5138,8 @@ CMDs[#CMDs + 1] = {NAME = 'noesp / unesp / unespteam', DESC = 'Removes ESP'}
 CMDs[#CMDs + 1] = {NAME = 'esptransparency [number]', DESC = 'Changes the transparency of ESP related commands'}
 CMDs[#CMDs + 1] = {NAME = 'partesp [part name]', DESC = 'Highlights a part.'}
 CMDs[#CMDs + 1] = {NAME = 'unpartesp / nopartesp [part name]', DESC = 'removes partesp.'}
+CMDs[#CMDs + 1] = {NAME = 'modelesp [part name]', DESC = 'Highlights a model.'}
+CMDs[#CMDs + 1] = {NAME = 'unmodel / nomodelesp [part name]', DESC = 'removes modelesp.'}
 CMDs[#CMDs + 1] = {NAME = 'chams', DESC = 'ESP but without text in the way.'}
 CMDs[#CMDs + 1] = {NAME = 'nochams / unchams', DESC = 'Removes chams.'}
 CMDs[#CMDs + 1] = {NAME = 'locate [player]', DESC = 'View a single player and their status.'}
@@ -8578,7 +8581,9 @@ addcmd('esptransparency',{},function(args, speaker)
 end)
 
 local espParts = {}
+local espModels = {}
 local partEspTrigger = nil
+local modelEspTrigger = nil
 function partAdded(part)
 	if #espParts > 0 then
 		if part:IsA("BasePart") and FindInTable(espParts, part.Name:lower()) then
@@ -8595,6 +8600,33 @@ function partAdded(part)
 	else
 		partEspTrigger:Disconnect()
 		partEspTrigger = nil
+	end
+end
+
+local function highlightModel(model)
+	for _, v in pairs(model:GetDescendants()) do
+		if v:IsA("BasePart") then
+			local a = Instance.new("BoxHandleAdornment")
+			a.Name = model.Name:lower().."_MESP"
+			a.Parent = v
+			a.Adornee = v
+			a.AlwaysOnTop = true
+			a.ZIndex = 0
+			a.Size = v.Size
+			a.Transparency = espTransparency
+			a.Color = BrickColor.new("Lime green")
+		end
+	end
+end
+
+local function modelAdded(obj)
+	if #espModels > 0 then
+		if obj:IsA("Model") and FindInTable(espModels, obj.Name:lower()) then
+			highlightModel(obj)
+		end
+	else
+		modelEspTrigger:Disconnect()
+		modelEspTrigger = nil
 	end
 end
 
@@ -8638,6 +8670,44 @@ addcmd('unpartesp',{'nopartesp'},function(args, speaker)
 		espParts = {}
 		for i,v in pairs(workspace:GetDescendants()) do
 			if v:IsA("BoxHandleAdornment") and v.Name:sub(-5) == '_PESP' then
+				v:Destroy()
+			end
+		end
+	end
+end)
+
+addcmd('modelesp', {}, function(args, speaker)
+	local modelName = getstring(1):lower()
+	if not FindInTable(espModels, modelName) then
+		table.insert(espModels, modelName)
+		for _, v in pairs(workspace:GetDescendants()) do
+			if v:IsA("Model") and v.Name:lower() == modelName then
+				highlightModel(v)
+			end
+		end
+	end
+	if modelEspTrigger == nil then
+		modelEspTrigger = workspace.DescendantAdded:Connect(modelAdded)
+	end
+end)
+
+addcmd('unmodelesp', {'nomodelesp'}, function(args, speaker)
+	if args[1] then
+		local modelName = getstring(1):lower()
+		if FindInTable(espModels, modelName) then
+			table.remove(espModels, GetInTable(espModels, modelName))
+		end
+		for _, v in pairs(workspace:GetDescendants()) do
+			if v:IsA("BoxHandleAdornment") and v.Name == modelName..'_MESP' then
+				v:Destroy()
+			end
+		end
+	else
+		modelEspTrigger:Disconnect()
+		modelEspTrigger = nil
+		espModels = {}
+		for _, v in pairs(workspace:GetDescendants()) do
+			if v:IsA("BoxHandleAdornment") and v.Name:sub(-5) == '_MESP' then
 				v:Destroy()
 			end
 		end

@@ -11276,19 +11276,16 @@ function low_level_executor()
 end
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
-	if game.PlaceId == 7041939546 then
-		Notify_InfP("Hold on a sec", "Loading RemoteSpy (Hydroxide) for Catalog Avatar Creator")
+	if low_level_executor() then return Notify_InfP("Issue", "Your executor does not support this script.") end
+	if game.PlaceId == 7041939546 or game.PlaceId == 891852901 then
+		Notify_InfP("Hold on a sec", "Loading Hydroxide RemoteSpy (bypass).")
 		local owner = "Upbolt"
 		local branch = "revision"
-
-		local function webImport(file)
-			return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner, branch, file)), file .. '.lua')()
-		end
-
-		webImport("init")
-		webImport("ui/main")
+		local function web_import(file) return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner, branch, file)), file .. '.lua')() end
+		web_import("init")
+		web_import("ui/main")
 	else
-		Notify_InfP("Loading",'Hold on a sec')
+		Notify_InfP("Loading", 'Hold on a sec')
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))()
 	end
 end)
